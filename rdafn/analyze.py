@@ -5,5 +5,7 @@ Compute analytics for a redistricting map represented as a precinct-assignment f
 
 """
 
+import rdapy
+
 
 ### END ###
