@@ -2,15 +2,15 @@
 #
 
 """
-Extract census data & normalize it.
+Extract election data & normalize it.
 
 For example:
 
-$ scripts/extract_census.py -s NC
+$ scripts/extract_elections.py -s NC
 
 For documentation, type:
 
-$ scripts/extract_census.py -h
+$ scripts/extract_elections.py -h
 
 """
 
@@ -22,7 +22,7 @@ from rdafn import *
 
 def parse_args() -> Namespace:
     parser: ArgumentParser = argparse.ArgumentParser(
-        description="Extract census data from a vtd_data CSV file."
+        description="Extract election data from a vtd_data CSV file."
     )
 
     parser.add_argument(
@@ -41,7 +41,7 @@ def parse_args() -> Namespace:
 
 
 def main() -> None:
-    """Extract census data & normalize it."""
+    """Extract election data & normalize it."""
 
     args: Namespace = parse_args()
 
@@ -56,29 +56,22 @@ def main() -> None:
     )
     config: dict[str, Any] = read_json(config_path)
 
-    suffix: str = config["census_suffix"]
+    suffix: str = config["election_suffix"]
     geoid_field: str = config["geoid"]
-    total_field: str = config["total"]
-    demo_fields: list[str] = config["demos"]
+    elections: list[str] = config["elections"]
 
     if suffix != "":
         suffix = "-" + suffix
 
-    ### READ THE CENSUS CSV & EXTRACT THE DATA ###
+    ### READ THE ELECTIONS CSV & EXTRACT THE DATA ###
 
-    census: list[dict] = list()
-    fields: list[str] = [
-        "TOTAL_VAP",
-        "WHITE_VAP",
-        "HISPANIC_VAP",
-        "BLACK_VAP",
-        "NATIVE_VAP",
-        "ASIAN_VAP",
-        "PACIFIC_VAP",
-    ]
+    election: list[dict] = list()
+    total_fields: list[str] = [f"Tot_{e}" for e in elections]
+    rep_fields: list[str] = [f"R_{e}" for e in elections]
+    dem_fields: list[str] = [f"D_{e}" for e in elections]
 
     input_path: str = path_to_file([census_dir, xx]) + file_name(
-        [cycle, "census", xx + suffix], "_", "csv"
+        [cycle, "election", xx + suffix], "_", "csv"
     )
 
     with open(FileSpec(input_path).abs_path, "r", encoding="utf-8-sig") as file:
@@ -89,22 +82,19 @@ def main() -> None:
         for row_in in reader:
             row_out: dict = dict()
             row_out["GEOID"] = row_in[geoid_field]
-            row_out["TOTAL"] = row_in[total_field]
-            for i, field in enumerate(demo_fields):
-                row_out[fields[i]] = row_in[demo_fields[i]]
+            row_out["TOT"] = sum([int(row_in[x]) for x in total_fields])
+            row_out["REP"] = sum([int(row_in[x]) for x in rep_fields])
+            row_out["DEM"] = sum([int(row_in[x]) for x in dem_fields])
+            row_out["OTH"] = row_out["TOT"] - row_out["REP"] - row_out["DEM"]
 
-            row_out["MINORITY_VAP"] = int(row_out["TOTAL_VAP"]) - int(
-                row_out["WHITE_VAP"]
-            )
-
-            census.append(row_out)
+            election.append(row_out)
 
     ### WRITE THE NORMALIZED CENSUS DATA TO A CSV ###
 
     output_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "census"], "_", "csv"
+        [xx, cycle, "election"], "_", "csv"
     )
-    write_csv(output_path, census, ["GEOID", "TOTAL"] + fields + ["MINORITY_VAP"])
+    write_csv(output_path, election, ["GEOID", "TOT", "REP", "DEM", "OTH"])
 
 
 if __name__ == "__main__":
