@@ -57,11 +57,16 @@ def main() -> None:
     config: dict[str, Any] = read_json(config_path)
 
     suffix: str = config["election_suffix"]
-    geoid_field: str = config["geoid"]
+    input_geoid: str = config["geoid"]
     elections: list[str] = config["elections"]
 
     if suffix != "":
         suffix = "-" + suffix
+
+    tot_votes: str = election_fields[0]
+    rep_votes: str = election_fields[1]
+    dem_votes: str = election_fields[2]
+    oth_votes: str = election_fields[3]
 
     ### READ THE ELECTIONS CSV & EXTRACT THE DATA ###
 
@@ -81,12 +86,12 @@ def main() -> None:
 
         for row_in in reader:
             row_out: dict = dict()
-            row_out["GEOID"] = row_in[geoid_field]
-            row_out["TOT_VOTES"] = sum([int(row_in[x]) for x in total_fields])
-            row_out["REP_VOTES"] = sum([int(row_in[x]) for x in rep_fields])
-            row_out["DEM_VOTES"] = sum([int(row_in[x]) for x in dem_fields])
-            row_out["OTH_VOTES"] = (
-                row_out["TOT_VOTES"] - row_out["REP_VOTES"] - row_out["DEM_VOTES"]
+            row_out[geoid_field] = row_in[input_geoid]
+            row_out[tot_votes] = sum([int(row_in[x]) for x in total_fields])
+            row_out[rep_votes] = sum([int(row_in[x]) for x in rep_fields])
+            row_out[dem_votes] = sum([int(row_in[x]) for x in dem_fields])
+            row_out[oth_votes] = (
+                row_out[tot_votes] - row_out[rep_votes] - row_out[dem_votes]
             )
 
             election.append(row_out)
@@ -99,7 +104,7 @@ def main() -> None:
     write_csv(
         output_path,
         election,
-        ["GEOID", "TOT_VOTES", "REP_VOTES", "DEM_VOTES", "OTH_VOTES"],
+        [geoid_field] + election_fields,
     )
 
 

@@ -14,12 +14,26 @@ shapes_dir: str = "../../../local/pg-rawdata"
 ### PROJECT CONSTANTS ###
 
 cycle: str = "2020"
+geoid_field: str = "GEOID"
+census_fields: list[str] = [
+    "TOTAL_POP",
+    "TOTAL_VAP",
+    "WHITE_VAP",
+    "HISPANIC_VAP",
+    "BLACK_VAP",
+    "NATIVE_VAP",
+    "ASIAN_VAP",
+    "PACIFIC_VAP",
+    "MINORITY_VAP",
+]
+
+election_fields: list[str] = ["TOT_VOTES", "REP_VOTES", "DEM_VOTES", "OTH_VOTES"]
 
 ### PREPROCESSED DATA ###
 
 data_dir: str = "data"
 
-### REDISTRICTING ###
+### STATES ###
 
 STATE_FIPS: dict[str, str] = {
     "AL": "01",

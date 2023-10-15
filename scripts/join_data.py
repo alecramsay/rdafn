@@ -50,22 +50,6 @@ def main() -> None:
 
     verbose: bool = args.verbose
 
-    #
-
-    census_fields: list[str] = [
-        "TOTAL_POP",
-        "TOTAL_VAP",
-        "WHITE_VAP",
-        "HISPANIC_VAP",
-        "BLACK_VAP",
-        "NATIVE_VAP",
-        "ASIAN_VAP",
-        "PACIFIC_VAP",
-        "MINORITY_VAP",
-    ]
-
-    election_fields: list[str] = ["TOT_VOTES", "REP_VOTES", "DEM_VOTES", "OTH_VOTES"]
-
     ### READ THE CENSUS DATA ###
 
     census_path: str = path_to_file([data_dir, xx]) + file_name(
@@ -85,12 +69,12 @@ def main() -> None:
     data: dict[str, dict[str, int]] = dict()
 
     for row in census:
-        geoid: str = row["GEOID"]
-        data[geoid] = {k: row[k] for k in census_fields if k != "GEOID"}
+        geoid: str = row[geoid_field]
+        data[geoid] = {k: row[k] for k in census_fields if k != geoid_field}
 
     for row in election:
-        geoid: str = row["GEOID"]
-        data[geoid].update({k: row[k] for k in election_fields if k != "GEOID"})
+        geoid: str = row[geoid_field]
+        data[geoid].update({k: row[k] for k in election_fields if k != geoid_field})
 
     ### PICKLE THE DATA ###
 

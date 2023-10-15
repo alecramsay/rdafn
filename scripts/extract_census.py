@@ -57,25 +57,24 @@ def main() -> None:
     config: dict[str, Any] = read_json(config_path)
 
     suffix: str = config["census_suffix"]
-    geoid_field: str = config["geoid"]
+    input_geoid: str = config["geoid"]
     total_field: str = config["total"]
     demo_fields: list[str] = config["demos"]
 
     if suffix != "":
         suffix = "-" + suffix
 
+    total_pop: str = census_fields[0]
+    total_vap: str = census_fields[1]
+    white_vap: str = census_fields[2]
+    minority_vap: str = census_fields[-1]
+
     ### READ THE CENSUS CSV & EXTRACT THE DATA ###
 
     census: list[dict] = list()
-    fields: list[str] = [
-        "TOTAL_VAP",
-        "WHITE_VAP",
-        "HISPANIC_VAP",
-        "BLACK_VAP",
-        "NATIVE_VAP",
-        "ASIAN_VAP",
-        "PACIFIC_VAP",
-    ]
+    fields: list[str] = list(census_fields)
+    fields.remove(total_pop)
+    fields.remove(minority_vap)
 
     input_path: str = path_to_file([census_dir, xx]) + file_name(
         [cycle, "census", xx + suffix], "_", "csv"
@@ -88,14 +87,12 @@ def main() -> None:
 
         for row_in in reader:
             row_out: dict = dict()
-            row_out["GEOID"] = row_in[geoid_field]
-            row_out["TOTAL_POP"] = row_in[total_field]
+            row_out[geoid_field] = row_in[input_geoid]
+            row_out[total_pop] = row_in[total_field]
             for i, field in enumerate(demo_fields):
                 row_out[fields[i]] = row_in[demo_fields[i]]
 
-            row_out["MINORITY_VAP"] = int(row_out["TOTAL_VAP"]) - int(
-                row_out["WHITE_VAP"]
-            )
+            row_out[minority_vap] = int(row_out[total_vap]) - int(row_out[white_vap])
 
             census.append(row_out)
 
@@ -104,7 +101,7 @@ def main() -> None:
     output_path: str = path_to_file([data_dir, xx]) + file_name(
         [xx, cycle, "census"], "_", "csv"
     )
-    write_csv(output_path, census, ["GEOID", "TOTAL_POP"] + fields + ["MINORITY_VAP"])
+    write_csv(output_path, census, [geoid_field] + census_fields)
 
 
 if __name__ == "__main__":
