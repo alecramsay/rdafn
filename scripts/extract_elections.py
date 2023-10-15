@@ -82,10 +82,12 @@ def main() -> None:
         for row_in in reader:
             row_out: dict = dict()
             row_out["GEOID"] = row_in[geoid_field]
-            row_out["TOT"] = sum([int(row_in[x]) for x in total_fields])
-            row_out["REP"] = sum([int(row_in[x]) for x in rep_fields])
-            row_out["DEM"] = sum([int(row_in[x]) for x in dem_fields])
-            row_out["OTH"] = row_out["TOT"] - row_out["REP"] - row_out["DEM"]
+            row_out["TOT_VOTES"] = sum([int(row_in[x]) for x in total_fields])
+            row_out["REP_VOTES"] = sum([int(row_in[x]) for x in rep_fields])
+            row_out["DEM_VOTES"] = sum([int(row_in[x]) for x in dem_fields])
+            row_out["OTH_VOTES"] = (
+                row_out["TOT_VOTES"] - row_out["REP_VOTES"] - row_out["DEM_VOTES"]
+            )
 
             election.append(row_out)
 
@@ -94,7 +96,11 @@ def main() -> None:
     output_path: str = path_to_file([data_dir, xx]) + file_name(
         [xx, cycle, "election"], "_", "csv"
     )
-    write_csv(output_path, election, ["GEOID", "TOT", "REP", "DEM", "OTH"])
+    write_csv(
+        output_path,
+        election,
+        ["GEOID", "TOT_VOTES", "REP_VOTES", "DEM_VOTES", "OTH_VOTES"],
+    )
 
 
 if __name__ == "__main__":

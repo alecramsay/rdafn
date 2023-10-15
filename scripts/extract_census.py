@@ -89,7 +89,7 @@ def main() -> None:
         for row_in in reader:
             row_out: dict = dict()
             row_out["GEOID"] = row_in[geoid_field]
-            row_out["TOTAL"] = row_in[total_field]
+            row_out["TOTAL_POP"] = row_in[total_field]
             for i, field in enumerate(demo_fields):
                 row_out[fields[i]] = row_in[demo_fields[i]]
 
@@ -104,7 +104,7 @@ def main() -> None:
     output_path: str = path_to_file([data_dir, xx]) + file_name(
         [xx, cycle, "census"], "_", "csv"
     )
-    write_csv(output_path, census, ["GEOID", "TOTAL"] + fields + ["MINORITY_VAP"])
+    write_csv(output_path, census, ["GEOID", "TOTAL_POP"] + fields + ["MINORITY_VAP"])
 
 
 if __name__ == "__main__":
