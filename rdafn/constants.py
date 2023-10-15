@@ -11,6 +11,10 @@ census_dir: str = "../../../local/vtd_data/2020_vtd"
 election_dir: str = "../../../local/vtd_data/2020_vtd"
 shapes_dir: str = "../../../local/pg-rawdata"
 
+### PROJECT CONSTANTS ###
+
+cycle: str = "2020"
+
 ### PREPROCESSED DATA ###
 
 data_dir: str = "data"
