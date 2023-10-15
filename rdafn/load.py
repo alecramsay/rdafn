@@ -6,6 +6,7 @@ LOAD HELPERS
 
 from .constants import *
 from .readwrite import *
+from .datatypes import *
 
 
 def load_data(xx: str) -> dict[str, dict[str, int]]:
@@ -28,12 +29,12 @@ def load_shapes(xx: str):
     pass
 
 
-def load_plan(plan_file: str) -> list[dict[str, int]]:
+def load_plan(plan_file: str, name: Optional[str] = None) -> Plan:
     """Read a precinct-assignment file."""
 
-    precinct_assignments: list[dict[str, int]] = read_csv(plan_file, [str, int])
+    plan: Plan = Plan(plan_file, name)
 
-    return precinct_assignments
+    return plan
 
 
 ### END ###
