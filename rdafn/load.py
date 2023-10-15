@@ -4,6 +4,10 @@
 LOAD HELPERS
 """
 
+import pandas as pd
+import geopandas
+from geopandas import GeoDataFrame
+
 from .constants import *
 from .readwrite import *
 from .datatypes import *
@@ -21,12 +25,30 @@ def load_data(xx: str) -> dict[str, dict[str, int]]:
     return data
 
 
-def load_shapes(xx: str):
+def load_shapes(xx: str) -> pd.Series | pd.DataFrame | Any:
     """Load the shapefile for a state."""
 
-    # TODO
+    fips_map: dict[str, str] = STATE_FIPS
+    fips: str = fips_map[xx]
 
-    pass
+    # https://geopandas.org/en/stable/docs/user_guide/io.html
+    shapes_file: str = f"tl_2020_{fips}_vtd20"
+    # TODO
+    shapes_path: str = (
+        "/Users/alecramsay/iCloud/dev/rdafn/" + f"{data_dir}/{xx}/{shapes_file}.zip"
+    )
+    zipfile: str = "zip://" + shapes_path
+
+    # shapes_path: str = os.path.expanduser(
+    #     f"{data_dir}/{xx}/{shapes_file}.zip!{shapes_file}.shp"
+    # )
+
+    blocks_gdf: GeoDataFrame = geopandas.read_file(zipfile)
+    blocks_df: pd.Series | pd.DataFrame | Any = blocks_gdf[["geometry", "GEOID20"]]
+    del blocks_gdf
+    assert isinstance(blocks_df, pd.DataFrame)
+
+    return blocks_df
 
 
 def load_plan(plan_file: str, name: Optional[str] = None) -> Plan:
