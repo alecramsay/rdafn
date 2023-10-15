@@ -16,7 +16,6 @@ $ scripts/extract_data.py -h
 
 import argparse
 from argparse import ArgumentParser, Namespace
-from typing import Any
 
 from rdafn import *
 
@@ -48,20 +47,26 @@ def main() -> None:
     args: Namespace = parse_args()
 
     xx: str = args.state
-    # TODO - FIPS
 
     verbose: bool = args.verbose
+
+    #
+
+    fips_map: dict[str, str] = STATE_FIPS
+    fips: str = fips_map[xx]
 
     ### RUN THE SCRIPTS ###
 
     commands: list[str] = [
         "scripts/extract_census.py -s {xx}",
         "scripts/extract_elections.py -s {xx}",
+        "scripts/copy_shapes.py -s {xx}",
         # TODO - More scripts
     ]
 
     for command in commands:
-        command: str = command.format(xx=xx)
+        command = command.format(xx=xx)
+        print(f"> {command} ...")
         os.system(command)
 
 
