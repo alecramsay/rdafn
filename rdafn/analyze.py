@@ -5,6 +5,8 @@ ANALYZE A PLAN
 """
 
 import pandas as pd
+from geopandas import GeoDataFrame
+
 import rdapy as rda
 
 from .constants import *
@@ -17,7 +19,8 @@ def analyze_plan(
     name: str,
     assignments: list[dict[str, int]],
     data: dict[str, dict[str, int]],
-    shapes: pd.Series | pd.DataFrame | Any,
+    shapes_df: pd.Series | pd.DataFrame | Any,
+    compactness: bool = True,
 ) -> dict[str, int | float]:
     """Analyze a plan."""
 
@@ -68,6 +71,7 @@ def analyze_plan(
         district: i for i, district in enumerate(districts)
     }
     # End NOTE
+
     CxD: list[list[float]] = [[0.0] * len(counties) for _ in range(len(districts))]
 
     for row in assignments:
@@ -96,40 +100,33 @@ def analyze_plan(
 
         CxD[i][j] += pop
 
-    pass
-
     ### CREATE DISTRICT SHAPES ###
 
-    # TODO
+    if compactness:
+        plan_df: pd.DataFrame = pd.DataFrame(assignments)
+        shape_geoid_field: str = "GEOID" if "GEOID" in plan_df.columns else "GEOID20"
+        shape_district_field: str = (
+            "DISTRICT" if "DISTRICT" in plan_df.columns else "District"
+        )
+        # assert isinstance(plan_df, pd.DataFrame) # TODO
 
-    # Or construct them from block shapes and a block-assigment file:
-    # shapes_path: str = os.path.expanduser(f"{data_dir}/{shapes_file}")
-    # blocks_gdf: GeoDataFrame = geopandas.read_file(shapes_path)
-    # blocks_df: pd.Series | pd.DataFrame | Any = blocks_gdf[["geometry", "GEOID20"]]
-    # del blocks_gdf
-    # assert isinstance(blocks_df, pd.DataFrame)
+        shapes_df = shapes_df.merge(
+            plan_df,
+            how="left",
+            left_on="GEOID20",
+            right_on=shape_geoid_field,
+        )
+        shapes_df = shapes_df[["geometry", shape_geoid_field, shape_district_field]]
+        assert isinstance(shapes_df, GeoDataFrame)
+        del plan_df
 
-    # plan_path: str = os.path.expanduser(f"{data_dir}/{plan_file}")
-    # plan_gdf: GeoDataFrame = geopandas.read_file(plan_path)
-    # plan_df: pd.Series | pd.DataFrame | Any = plan_gdf[["GEOID20", "District"]]
-    # del plan_gdf
-    # assert isinstance(plan_df, pd.DataFrame)
+        districts_df = shapes_df.dissolve(by=shape_district_field, as_index=False)
 
-    # blocks_df = blocks_df.merge(
-    #     plan_df,
-    #     how="left",
-    #     left_on="GEOID20",
-    #     right_on="GEOID20",
-    # )
-    # blocks_df = blocks_df[["geometry", "GEOID20", "District"]]
-    # assert isinstance(blocks_df, GeoDataFrame)
-    # del plan_df
-
-    # districts_df = blocks_df.dissolve(by="District", as_index=False)
-
-    # unsorted_shapes: list[dict] = districts_df.to_dict("records")
-    # sorted_shapes: list[dict] = sorted(unsorted_shapes, key=lambda k: k["District"])
-    # shapes = [s["geometry"] for s in sorted_shapes]  # discard the id
+        unsorted_shapes: list[dict] = districts_df.to_dict("records")
+        sorted_shapes: list[dict] = sorted(
+            unsorted_shapes, key=lambda k: k[shape_district_field]
+        )
+        shapes = [s["geometry"] for s in sorted_shapes]  # discard the id
 
     ### CALCULATE ANALYTICS ###
 
@@ -208,11 +205,17 @@ def analyze_plan(
 
     # Compactness
 
+    if compactness:
+        compactness_metrics: dict = rda.calc_compactness(shapes)
+        scorecard["reock"] = compactness_metrics["avgReock"]
+        scorecard["polsby_popper"] = compactness_metrics["avgPolsby"]
+        # scorecard["kiwysi"] = compactness_metrics["avgKIWYSI"]
+
+    # Splitting
+
     splitting_metrics: dict = rda.calc_county_district_splitting(CxD)
     scorecard["county_splitting"] = splitting_metrics["county"]
     scorecard["district_splitting"] = splitting_metrics["district"]
-
-    # TODO - Splitting
 
     # TODO - Ratings
 

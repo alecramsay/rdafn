@@ -36,12 +36,14 @@ def load_shapes(xx: str) -> pd.Series | pd.DataFrame | Any:
     shapes_path: str = os.path.expanduser(f"{data_dir}/{xx}/{shapes_file}")
     # zipfile: str = "zip://" + shapes_path + f"!data/{shapes_file}.shp" # TODO
 
-    blocks_gdf: GeoDataFrame = geopandas.read_file(shapes_path)
-    blocks_df: pd.Series | pd.DataFrame | Any = blocks_gdf[["geometry", "GEOID20"]]
-    del blocks_gdf
-    assert isinstance(blocks_df, pd.DataFrame)
+    precincts_gdf: GeoDataFrame = geopandas.read_file(shapes_path)
+    precincts_df: pd.Series | pd.DataFrame | Any = precincts_gdf[
+        ["geometry", "GEOID20"]
+    ]
+    del precincts_gdf
+    assert isinstance(precincts_df, pd.DataFrame)
 
-    return blocks_df
+    return precincts_df
 
 
 def load_plan(plan_file: str, name: Optional[str] = None) -> Plan:
