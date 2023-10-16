@@ -128,6 +128,7 @@ def analyze_plan(
     bias_metrics.pop("rvPoints", None)
     bias_metrics.pop("gamma", None)
     bias_metrics.pop("gSym", None)
+    bias_metrics["disproportionality"] = bias_metrics.pop("deviation")
     scorecard.update(bias_metrics)
 
     responsiveness_metrics: dict = dict(partisan_metrics["responsiveness"])
