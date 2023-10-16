@@ -7,8 +7,10 @@ ANALYZE A PLAN
 import pandas as pd
 
 from .datatypes import *
+from .utils import *
 
 
+@time_function
 def analyze_plan(
     name: str,
     assignments: list[dict[str, int]],

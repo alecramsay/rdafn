@@ -33,17 +33,10 @@ def load_shapes(xx: str) -> pd.Series | pd.DataFrame | Any:
 
     # https://geopandas.org/en/stable/docs/user_guide/io.html
     shapes_file: str = f"tl_2020_{fips}_vtd20"
-    # TODO
-    shapes_path: str = (
-        "/Users/alecramsay/iCloud/dev/rdafn/" + f"{data_dir}/{xx}/{shapes_file}.zip"
-    )
-    zipfile: str = "zip://" + shapes_path
+    shapes_path: str = os.path.expanduser(f"{data_dir}/{xx}/{shapes_file}")
+    # zipfile: str = "zip://" + shapes_path + f"!data/{shapes_file}.shp" # TODO
 
-    # shapes_path: str = os.path.expanduser(
-    #     f"{data_dir}/{xx}/{shapes_file}.zip!{shapes_file}.shp"
-    # )
-
-    blocks_gdf: GeoDataFrame = geopandas.read_file(zipfile)
+    blocks_gdf: GeoDataFrame = geopandas.read_file(shapes_path)
     blocks_df: pd.Series | pd.DataFrame | Any = blocks_gdf[["geometry", "GEOID20"]]
     del blocks_gdf
     assert isinstance(blocks_df, pd.DataFrame)
