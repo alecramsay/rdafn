@@ -23,7 +23,7 @@ def analyze_plan(
 
     print(f"Analyzing plan {name} ...")
 
-    ### AGGREGATE DATA BY DISTRICT ###
+    ### FIELD NAMES ###
 
     total_pop_field: str = census_fields[0]
     total_vap_field: str = census_fields[1]
@@ -40,6 +40,8 @@ def analyze_plan(
     dem_votes_field: str = election_fields[2]
     oth_votes_field: str = election_fields[3]
 
+    ### AGGREGATE DATA BY DISTRICT ###
+
     total_pop: int = 0
     pop_by_district: defaultdict[int | str, int] = defaultdict(int)
 
@@ -47,6 +49,24 @@ def analyze_plan(
     tot_by_district: defaultdict[int | str, int] = defaultdict(int)
     d_statewide: int = 0
     tot_statewide: int = 0
+
+    counties: set[str] = set()
+    districts: set[int | str] = set()
+
+    for row in assignments:
+        precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
+        district: int = row["DISTRICT"] if "DISTRICT" in row else row["District"]
+
+        county: str = GeoID(precinct).county[2:]
+
+        counties.add(county)
+        districts.add(district)
+
+    county_to_index: dict[str, int] = {county: i for i, county in enumerate(counties)}
+    district_to_index: dict[int | str, int] = {
+        district: i for i, district in enumerate(districts)
+    }
+    CxD: list[list[float]] = [[0.0] * len(counties) for _ in range(len(districts))]
 
     for row in assignments:
         precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
@@ -66,6 +86,13 @@ def analyze_plan(
 
         tot_by_district[district] += tot
         tot_statewide += tot
+
+        county: str = GeoID(precinct).county[2:]
+
+        i: int = district_to_index[district]
+        j: int = county_to_index[county]
+
+        CxD[i][j] += pop
 
     Vf: float = d_statewide / tot_statewide
     Vf_array: list[float] = [
@@ -118,7 +145,7 @@ def analyze_plan(
     target_pop: int = int(total_pop / len(pop_by_district))
 
     deviation: float = rda.calc_population_deviation(max_pop, min_pop, target_pop)
-    scorecard["popdev"] = deviation
+    scorecard["popDev"] = deviation
 
     # Partisan metrics
 
@@ -139,7 +166,11 @@ def analyze_plan(
 
     # TODO - Minority
 
-    # TODO - Compactness
+    # Compactness
+
+    splitting_metrics: dict = rda.calc_county_district_splitting(CxD)
+    scorecard["countySplitting"] = splitting_metrics["county"]
+    scorecard["districtSplitting"] = splitting_metrics["district"]
 
     # TODO - Splitting
 
