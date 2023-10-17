@@ -14,6 +14,7 @@ $ scripts/copy_shapes.py -h
 
 """
 
+import os
 import argparse
 from argparse import ArgumentParser, Namespace
 
@@ -58,16 +59,20 @@ def main() -> None:
     ### COPY THE SHAPES ###
 
     shapes_file: str = f"tl_2020_{fips}_vtd20"
-    input_path: str = os.path.expanduser(f"{shapes_dir}/{xx}/{shapes_file}")
+    input_path: str = path_to_file([f"../../{shapes_dir}", xx, shapes_file])
 
-    output_path: str = path_to_file([data_dir, xx])
+    working_dir: str = f"{data_dir}/{xx}"
 
+    output_path: str = path_to_file([data_dir, xx, shapes_file])
+
+    os.chdir(working_dir)
     commands: list[str] = [
-        f"cp -R {input_path} {output_path}",
-        f"zip -r {output_path}/{shapes_file}.zip {output_path}/{shapes_file}/",
-        f"rm -rf {output_path}/{shapes_file}/",
+        f"cp -R {input_path} {shapes_file}/",
+        f"zip -r {shapes_file}.zip {shapes_file}/",
+        f"rm -rf {shapes_file}/",
     ]
     for command in commands:
+        # print(command)
         os.system(command)
 
 
