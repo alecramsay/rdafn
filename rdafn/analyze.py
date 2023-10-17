@@ -209,7 +209,7 @@ def analyze_plan(
         compactness_metrics: dict = rda.calc_compactness(shapes)
         scorecard["reock"] = compactness_metrics["avgReock"]
         scorecard["polsby_popper"] = compactness_metrics["avgPolsby"]
-        # scorecard["kiwysi"] = compactness_metrics["avgKIWYSI"]
+        scorecard["kiwysi"] = compactness_metrics["avgKIWYSI"]
 
     # Splitting
 

@@ -31,10 +31,10 @@ def load_shapes(xx: str) -> pd.Series | pd.DataFrame | Any:
     fips_map: dict[str, str] = STATE_FIPS
     fips: str = fips_map[xx]
 
-    # https://geopandas.org/en/stable/docs/user_guide/io.html
     shapes_file: str = f"tl_2020_{fips}_vtd20"
-    shapes_path: str = os.path.expanduser(f"{data_dir}/{xx}/{shapes_file}")
-    # zipfile: str = "zip://" + shapes_path + f"!data/{shapes_file}.shp" # TODO
+    shapes_path: str = os.path.abspath(f"{data_dir}/{xx}/{shapes_file}")
+    # https://geopandas.org/en/stable/docs/user_guide/io.html
+    shapes_path: str = f"zip://{shapes_path}.zip!{shapes_file}"
 
     precincts_gdf: GeoDataFrame = geopandas.read_file(shapes_path)
     precincts_df: pd.Series | pd.DataFrame | Any = precincts_gdf[
