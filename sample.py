@@ -6,7 +6,8 @@
 from rdafn import *
 
 xx: str = "NC"
-N: int = 14
+N: int = 14  # TODO - Get this from metadata
+C: int = 100  # TODO - Ditto
 
 compactness: bool = False
 
@@ -24,7 +25,7 @@ for plan_path in ensemble:
     plan: Plan = load_plan(plan_path)
 
     scorecard: dict[str, Any] = analyze_plan(
-        plan.name, plan.assignments, data, shapes, N, compactness
+        plan.name, plan.assignments, data, shapes, N, C, compactness
     )
 
     print()

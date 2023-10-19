@@ -21,6 +21,7 @@ def analyze_plan(
     data: dict[str, dict[str, int]],
     shapes_df: pd.Series | pd.DataFrame | Any,
     n_districts: int,
+    n_counties: int,
     compactness: bool = True,
 ) -> dict[str, Any]:
     """Analyze a plan."""
@@ -84,9 +85,6 @@ def analyze_plan(
     district_to_index: dict[int | str, int] = {
         district: i for i, district in enumerate(districts)
     }
-
-    n_counties: int = len(counties)
-    n_districts: int = len(districts)
 
     # End NOTE
 
