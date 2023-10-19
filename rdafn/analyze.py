@@ -178,25 +178,31 @@ def analyze_plan(
     ]
 
     partisan_metrics: dict = rda.calc_partisan_metrics(Vf, Vf_array)
+
     bias_metrics: dict = dict()
+
+    bias_metrics["pr_deviation"] = partisan_metrics["bias"]["deviation"]
     bias_metrics["pr_seats"] = partisan_metrics["bias"]["bestS"]
     bias_metrics["pr_pct"] = partisan_metrics["bias"]["bestSf"]
     bias_metrics["estimated_seats"] = partisan_metrics["bias"]["estS"]
     bias_metrics["estimated_seat_pct"] = partisan_metrics["bias"]["estSf"]
-    bias_metrics["pr_deviation"] = partisan_metrics["bias"]["deviation"]
-    bias_metrics["turnout_bias"] = partisan_metrics["bias"]["tOf"]
     bias_metrics["fptp_seats"] = partisan_metrics["bias"]["fptpS"]
+
+    bias_metrics["disproportionality"] = partisan_metrics["bias"]["prop"]
+    bias_metrics["efficiency_gap"] = partisan_metrics["bias"]["eG"]
+    bias_metrics["gamma"] = partisan_metrics["bias"]["gamma"]
+
     bias_metrics["seats_bias"] = partisan_metrics["bias"]["bS50"]
     bias_metrics["votes_bias"] = partisan_metrics["bias"]["bV50"]
-    bias_metrics["declination"] = partisan_metrics["bias"]["decl"]
-    bias_metrics["global_symmetry"] = partisan_metrics["bias"]["gSym"]
-    bias_metrics["gamma"] = partisan_metrics["bias"]["gamma"]
-    bias_metrics["efficiency_gap"] = partisan_metrics["bias"]["eG"]
     bias_metrics["geometric_seats_bias"] = partisan_metrics["bias"]["bSV"]
-    bias_metrics["disproportionality"] = partisan_metrics["bias"]["prop"]
+    bias_metrics["global_symmetry"] = partisan_metrics["bias"]["gSym"]
+
+    bias_metrics["declination"] = partisan_metrics["bias"]["decl"]
     bias_metrics["mean_median_statewide"] = partisan_metrics["bias"]["mMs"]
     bias_metrics["mean_median_average_district"] = partisan_metrics["bias"]["mMd"]
+    bias_metrics["turnout_bias"] = partisan_metrics["bias"]["tOf"]
     bias_metrics["lopsided_outcomes"] = partisan_metrics["bias"]["lO"]
+
     scorecard.update(bias_metrics)
 
     # For rating
@@ -204,35 +210,40 @@ def analyze_plan(
     Sf: float = scorecard["estimated_seat_pct"]
 
     responsiveness_metrics: dict = dict()
+
     responsiveness_metrics["competitive_districts"] = partisan_metrics[
         "responsiveness"
     ]["cD"]
     responsiveness_metrics["competitive_district_pct"] = partisan_metrics[
         "responsiveness"
     ]["cDf"]
-    responsiveness_metrics["overall_responsiveness"] = partisan_metrics[
-        "responsiveness"
-    ][
-        "bigR"
-    ]  # BIG 'R': Defined in Footnote 22 on P. 10
+
     responsiveness_metrics["responsiveness"] = partisan_metrics["responsiveness"][
         "littleR"
     ]
-    # responsiveness_metrics["minimal_inverse_responsiveness"] = partisan_metrics[
-    #     "responsiveness"
-    # ][
-    #     "mIR"
-    # ]  # zeta = (1 / r) - (1 / r_sub_max) : Eq. 5.2.1
     responsiveness_metrics["responsive_districts"] = partisan_metrics["responsiveness"][
         "rD"
     ]
     responsiveness_metrics["responsive_district_pct"] = partisan_metrics[
         "responsiveness"
     ]["rDf"]
+    responsiveness_metrics["overall_responsiveness"] = partisan_metrics[
+        "responsiveness"
+    ][
+        "bigR"
+    ]  # BIG 'R': Defined in Footnote 22 on P. 10
+    # responsiveness_metrics["minimal_inverse_responsiveness"] = partisan_metrics[
+    #     "responsiveness"
+    # ][
+    #     "mIR"
+    # ]  # zeta = (1 / r) - (1 / r_sub_max) : Eq. 5.2.1
+
     scorecard.update(responsiveness_metrics)
 
-    scorecard.update({"avg_dem_win_pct": partisan_metrics["averageDVf"]})
-    scorecard.update({"avg_rep_win_pct": partisan_metrics["averageRVf"]})
+    scorecard["avg_dem_win_pct"] = partisan_metrics["averageDVf"]
+    scorecard["avg_rep_win_pct"] = (
+        1.0 - partisan_metrics["averageRVf"]
+    )  # Invert the D % to get the R %.
 
     # For rating
     cdf: float = scorecard["competitive_district_pct"]
@@ -270,21 +281,21 @@ def analyze_plan(
 
     ## Compactness
 
+    avg_reock: float = 1.0  # TODO - Remove this, when removing 'compactness' switch
+    avg_polsby: float = 1.0  # TODO
     if compactness:
         compactness_metrics: dict = rda.calc_compactness(shapes)
         scorecard["reock"] = compactness_metrics["avgReock"]
         scorecard["polsby_popper"] = compactness_metrics["avgPolsby"]
-        scorecard["kiwysi"] = compactness_metrics["avgKIWYSI"]
+        # Invert the KIWYSI rank (1-100, lower is better) to a score (0-100, higher is better)
+        scorecard["kiwysi"] = 100 - round(compactness_metrics["avgKIWYSI"]) + 1
 
         avg_reock: float = scorecard["reock"]
         avg_polsby: float = scorecard["polsby_popper"]
 
-        # // Rate compactness
-        # const avgReock = scorecard.compactness.avgReock;
-        # const avgPolsby = scorecard.compactness.avgPolsby;
-        # const reockRating = Rate.rateReock(avgReock);
-        # const polsbyRating = Rate.ratePolsby(avgPolsby);
-        # scorecard.compactness.score = Rate.rateCompactness(reockRating, polsbyRating);
+        # For rating
+        avg_reock: float = scorecard["reock"]
+        avg_polsby: float = scorecard["polsby_popper"]
 
     ## Splitting
 
@@ -301,14 +312,16 @@ def analyze_plan(
     ## Ratings
 
     ratings: dict[str, int] = dict()
-    ratings["proportionality"] = rda.rate_proportionality(disproportionality, Vf, Sf)
-    ratings["competitiveness"] = rda.rate_competitiveness(cdf)
-    ratings["minority"] = rda.rate_minority_opportunity(od, pod, cd, pcd)
-    # rate_compactness(reock_rating: int, polsby_rating: int) -> int:
 
-    # const countyRating = Rate.rateCountySplitting(rawCountySplitting, nCounties, nDistricts);
-    # const districtRating = Rate.rateDistrictSplitting(rawDistrictSplitting, nCounties, nDistricts);
-    # scorecard.splitting.score = Rate.rateSplitting(countyRating, districtRating);
+    ratings["proportionality"] = rda.rate_proportionality(disproportionality, Vf, Sf)
+
+    ratings["competitiveness"] = rda.rate_competitiveness(cdf)
+
+    ratings["minority"] = rda.rate_minority_opportunity(od, pod, cd, pcd)
+
+    reock_rating: int = rda.rate_reock(avg_reock)
+    polsby_rating: int = rda.rate_polsby(avg_polsby)
+    ratings["compactness"] = rda.rate_compactness(reock_rating, polsby_rating)
 
     county_rating: int = rda.rate_county_splitting(
         county_splitting, n_counties, n_districts
