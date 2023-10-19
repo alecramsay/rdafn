@@ -23,7 +23,7 @@ ensemble: list[str] = [root_plan]
 for plan_path in ensemble:
     plan: Plan = load_plan(plan_path)
 
-    scorecard: dict[str, int | float] = analyze_plan(
+    scorecard: dict[str, Any] = analyze_plan(
         plan.name, plan.assignments, data, shapes, N, compactness
     )
 

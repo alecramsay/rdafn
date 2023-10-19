@@ -22,7 +22,7 @@ def analyze_plan(
     shapes_df: pd.Series | pd.DataFrame | Any,
     n_districts: int,
     compactness: bool = True,
-) -> dict[str, int | float]:
+) -> dict[str, Any]:
     """Analyze a plan."""
 
     print(f"Analyzing plan {name} ...")
@@ -31,18 +31,18 @@ def analyze_plan(
 
     total_pop_field: str = census_fields[0]
     total_vap_field: str = census_fields[1]
-    white_vap_field: str = census_fields[2]
-    hispanic_vap_field: str = census_fields[3]
-    black_vap_field: str = census_fields[4]
-    native_vap_field: str = census_fields[5]
-    asian_vap_field: str = census_fields[6]
-    pacific_vap_field: str = census_fields[7]
-    minority_vap_field: str = census_fields[8]
+    # white_vap_field: str = census_fields[2]
+    # hispanic_vap_field: str = census_fields[3]
+    # black_vap_field: str = census_fields[4]
+    # native_vap_field: str = census_fields[5]
+    # asian_vap_field: str = census_fields[6]
+    # pacific_vap_field: str = census_fields[7]
+    # minority_vap_field: str = census_fields[8]
 
-    total_votes_field: str = election_fields[0]
+    # total_votes_field: str = election_fields[0]
     rep_votes_field: str = election_fields[1]
     dem_votes_field: str = election_fields[2]
-    oth_votes_field: str = election_fields[3]
+    # oth_votes_field: str = election_fields[3]
 
     ### AGGREGATE DATA BY DISTRICT ###
 
@@ -60,9 +60,9 @@ def analyze_plan(
 
     # For minority opportunity metrics
 
-    demos_totals: dict[str, float] = defaultdict(int)
-    demos_by_district: list[dict[str, float]] = [
-        dict(demos_totals) for _ in range(n_districts)
+    demos_totals: dict[str, int] = defaultdict(int)
+    demos_by_district: list[dict[str, int]] = [
+        defaultdict(int) for _ in range(n_districts + 1)
     ]
 
     # For county-district splitting
@@ -113,7 +113,9 @@ def analyze_plan(
 
         # For minority opportunity metrics
 
-        # TODO
+        for demo in census_fields[1:]:  # Everything except total population
+            demos_totals[demo] += data[precinct][demo]
+            demos_by_district[district][demo] += data[precinct][demo]
 
         # For county-district splitting
 
@@ -155,7 +157,7 @@ def analyze_plan(
 
     ### CALCULATE ANALYTICS ###
 
-    scorecard: dict[str, int | float] = dict()
+    scorecard: dict[str, Any] = dict()
 
     # Population deviation
 
@@ -226,7 +228,30 @@ def analyze_plan(
     scorecard.update({"avg_dem_win_pct": partisan_metrics["averageDVf"]})
     scorecard.update({"avg_rep_win_pct": partisan_metrics["averageRVf"]})
 
-    # TODO - Minority
+    # Minority
+
+    statewide_demos: dict[str, float] = dict()
+    for demo in census_fields[2:]:  # Skip total population & total VAP
+        simple_demo: str = demo.split("_")[0].lower()
+        statewide_demos[simple_demo] = (
+            demos_totals[demo] / demos_totals[total_vap_field]
+        )
+
+    by_district: list[dict[str, float]] = list()
+    for i in range(1, n_districts + 1):
+        district_demos: dict[str, float] = dict()
+        for demo in census_fields[2:]:  # Skip total population & total VAP
+            simple_demo: str = demo.split("_")[0].lower()
+            district_demos[simple_demo] = (
+                demos_by_district[i][demo] / demos_by_district[i][total_vap_field]
+            )
+
+        by_district.append(district_demos)
+
+    minority_metrics: dict[str, float] = rda.calc_minority_opportunity(
+        statewide_demos, by_district
+    )
+    scorecard.update(minority_metrics)
 
     # Compactness
 
