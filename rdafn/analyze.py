@@ -102,6 +102,7 @@ def analyze_plan(
 
     ### CREATE DISTRICT SHAPES ###
 
+    shapes: list[Any] = list()  # HACK
     if compactness:
         plan_df: pd.DataFrame = pd.DataFrame(assignments)
         shape_geoid_field: str = "GEOID" if "GEOID" in plan_df.columns else "GEOID20"
@@ -216,6 +217,8 @@ def analyze_plan(
     splitting_metrics: dict = rda.calc_county_district_splitting(CxD)
     scorecard["county_splitting"] = splitting_metrics["county"]
     scorecard["district_splitting"] = splitting_metrics["district"]
+    # NOTE - The simple # of counties split unexpectedly is computed in dra2020/district-analytics,
+    # i.e., not in dra2020/dra-analytics in the analytics proper.
 
     # TODO - Ratings
 
