@@ -51,7 +51,7 @@ def analyze_plan(
     total_pop: int = 0
     pop_by_district: defaultdict[int | str, int] = defaultdict(int)
 
-    # For partisan metrics
+    ## For partisan metrics
 
     total_votes: int = 0
     total_d_votes: int = 0
@@ -67,7 +67,7 @@ def analyze_plan(
 
     # For county-district splitting
 
-    # NOTE - This could be done once for all plans being analyzed.
+    # NOTE - This could all be done once for all plans being analyzed.
     counties: set[str] = set()
     districts: set[int | str] = set()
 
@@ -84,9 +84,13 @@ def analyze_plan(
     district_to_index: dict[int | str, int] = {
         district: i for i, district in enumerate(districts)
     }
+
+    n_counties: int = len(counties)
+    n_districts: int = len(districts)
+
     # End NOTE
 
-    CxD: list[list[float]] = [[0.0] * len(counties) for _ in range(len(districts))]
+    CxD: list[list[float]] = [[0.0] * n_counties for _ in range(n_districts)]
 
     for row in assignments:
         precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
@@ -159,16 +163,16 @@ def analyze_plan(
 
     scorecard: dict[str, Any] = dict()
 
-    # Population deviation
+    ## Population deviation
 
     max_pop: int = max(pop_by_district.values())
     min_pop: int = min(pop_by_district.values())
-    target_pop: int = int(total_pop / len(pop_by_district))
+    target_pop: int = int(total_pop / n_districts)
 
     deviation: float = rda.calc_population_deviation(max_pop, min_pop, target_pop)
     scorecard["population_deviation"] = deviation
 
-    # Partisan metrics
+    ## Partisan metrics
 
     Vf: float = total_d_votes / total_votes
     Vf_array: list[float] = [
@@ -196,6 +200,10 @@ def analyze_plan(
     bias_metrics["mean_median_average_district"] = partisan_metrics["bias"]["mMd"]
     bias_metrics["lopsided_outcomes"] = partisan_metrics["bias"]["lO"]
     scorecard.update(bias_metrics)
+
+    # For rating
+    disproportionality: float = scorecard["disproportionality"]
+    Sf: float = scorecard["estimated_seat_pct"]
 
     responsiveness_metrics: dict = dict()
     responsiveness_metrics["competitive_districts"] = partisan_metrics[
@@ -228,7 +236,10 @@ def analyze_plan(
     scorecard.update({"avg_dem_win_pct": partisan_metrics["averageDVf"]})
     scorecard.update({"avg_rep_win_pct": partisan_metrics["averageRVf"]})
 
-    # Minority
+    # For rating
+    cdf: float = scorecard["competitive_district_pct"]
+
+    ## Minority
 
     statewide_demos: dict[str, float] = dict()
     for demo in census_fields[2:]:  # Skip total population & total VAP
@@ -253,7 +264,13 @@ def analyze_plan(
     )
     scorecard.update(minority_metrics)
 
-    # Compactness
+    # For rating
+    od: float = scorecard["opportunity_districts"]
+    pod: float = scorecard["proportional_opportunities"]
+    cd: float = scorecard["coalition_districts"]
+    pcd: float = scorecard["proportional_coalitions"]
+
+    ## Compactness
 
     if compactness:
         compactness_metrics: dict = rda.calc_compactness(shapes)
@@ -261,7 +278,17 @@ def analyze_plan(
         scorecard["polsby_popper"] = compactness_metrics["avgPolsby"]
         scorecard["kiwysi"] = compactness_metrics["avgKIWYSI"]
 
-    # Splitting
+        avg_reock: float = scorecard["reock"]
+        avg_polsby: float = scorecard["polsby_popper"]
+
+        # // Rate compactness
+        # const avgReock = scorecard.compactness.avgReock;
+        # const avgPolsby = scorecard.compactness.avgPolsby;
+        # const reockRating = Rate.rateReock(avgReock);
+        # const polsbyRating = Rate.ratePolsby(avgPolsby);
+        # scorecard.compactness.score = Rate.rateCompactness(reockRating, polsbyRating);
+
+    ## Splitting
 
     splitting_metrics: dict = rda.calc_county_district_splitting(CxD)
     scorecard["county_splitting"] = splitting_metrics["county"]
@@ -269,7 +296,31 @@ def analyze_plan(
     # NOTE - The simple # of counties split unexpectedly is computed in dra2020/district-analytics,
     # i.e., not in dra2020/dra-analytics in the analytics proper.
 
-    # TODO - Ratings
+    # For rating
+    county_splitting: float = scorecard["county_splitting"]
+    district_splitting: float = scorecard["district_splitting"]
+
+    ## Ratings
+
+    ratings: dict[str, int] = dict()
+    ratings["proportionality"] = rda.rate_proportionality(disproportionality, Vf, Sf)
+    ratings["competitiveness"] = rda.rate_competitiveness(cdf)
+    ratings["minority"] = rda.rate_minority_opportunity(od, pod, cd, pcd)
+    # rate_compactness(reock_rating: int, polsby_rating: int) -> int:
+
+    # const countyRating = Rate.rateCountySplitting(rawCountySplitting, nCounties, nDistricts);
+    # const districtRating = Rate.rateDistrictSplitting(rawDistrictSplitting, nCounties, nDistricts);
+    # scorecard.splitting.score = Rate.rateSplitting(countyRating, districtRating);
+
+    county_rating: int = rda.rate_county_splitting(
+        county_splitting, n_counties, n_districts
+    )
+    district_rating: int = rda.rate_district_splitting(
+        district_splitting, n_counties, n_districts
+    )
+    ratings["splitting"] = rda.rate_splitting(county_rating, district_rating)
+
+    scorecard.update(ratings)
 
     return scorecard
 
