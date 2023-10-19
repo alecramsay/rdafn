@@ -6,7 +6,11 @@
 from rdafn import *
 
 xx: str = "NC"
+N: int = 14
+
 compactness: bool = False
+
+#
 
 data: dict[str, dict[str, int]] = load_data(xx)
 shapes: pd.Series | pd.DataFrame | Any = None
@@ -20,7 +24,7 @@ for plan_path in ensemble:
     plan: Plan = load_plan(plan_path)
 
     scorecard: dict[str, int | float] = analyze_plan(
-        plan.name, plan.assignments, data, shapes, compactness
+        plan.name, plan.assignments, data, shapes, N, compactness
     )
 
     print()

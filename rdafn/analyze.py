@@ -20,6 +20,7 @@ def analyze_plan(
     assignments: list[dict[str, int]],
     data: dict[str, dict[str, int]],
     shapes_df: pd.Series | pd.DataFrame | Any,
+    n_districts: int,
     compactness: bool = True,
 ) -> dict[str, int | float]:
     """Analyze a plan."""
@@ -38,20 +39,33 @@ def analyze_plan(
     pacific_vap_field: str = census_fields[7]
     minority_vap_field: str = census_fields[8]
 
-    tot_votes_field: str = election_fields[0]
+    total_votes_field: str = election_fields[0]
     rep_votes_field: str = election_fields[1]
     dem_votes_field: str = election_fields[2]
     oth_votes_field: str = election_fields[3]
 
     ### AGGREGATE DATA BY DISTRICT ###
 
+    # For population deviation
+
     total_pop: int = 0
     pop_by_district: defaultdict[int | str, int] = defaultdict(int)
 
+    # For partisan metrics
+
+    total_votes: int = 0
+    total_d_votes: int = 0
     d_by_district: defaultdict[int | str, int] = defaultdict(int)
     tot_by_district: defaultdict[int | str, int] = defaultdict(int)
-    d_statewide: int = 0
-    tot_statewide: int = 0
+
+    # For minority opportunity metrics
+
+    demos_totals: dict[str, float] = defaultdict(int)
+    demos_by_district: list[dict[str, float]] = [
+        dict(demos_totals) for _ in range(n_districts)
+    ]
+
+    # For county-district splitting
 
     # NOTE - This could be done once for all plans being analyzed.
     counties: set[str] = set()
@@ -78,9 +92,13 @@ def analyze_plan(
         precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
         district: int = row["DISTRICT"] if "DISTRICT" in row else row["District"]
 
+        # For population deviation
+
         pop: int = data[precinct][total_pop_field]
         pop_by_district[district] += pop
         total_pop += pop
+
+        # For partisan metrics
 
         d: int = data[precinct][dem_votes_field]
         tot: int = (
@@ -88,10 +106,16 @@ def analyze_plan(
         )  # NOTE - Two-party vote total
 
         d_by_district[district] += d
-        d_statewide += d
+        total_d_votes += d
 
         tot_by_district[district] += tot
-        tot_statewide += tot
+        total_votes += tot
+
+        # For minority opportunity metrics
+
+        # TODO
+
+        # For county-district splitting
 
         county: str = GeoID(precinct).county[2:]
 
@@ -100,7 +124,7 @@ def analyze_plan(
 
         CxD[i][j] += pop
 
-    ### CREATE DISTRICT SHAPES ###
+    ### CREATE DISTRICT SHAPES FOR COMPACTNESS ###
 
     shapes: list[Any] = list()  # HACK
     if compactness:
@@ -144,7 +168,7 @@ def analyze_plan(
 
     # Partisan metrics
 
-    Vf: float = d_statewide / tot_statewide
+    Vf: float = total_d_votes / total_votes
     Vf_array: list[float] = [
         d / tot for d, tot in zip(d_by_district.values(), tot_by_district.values())
     ]
