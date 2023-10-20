@@ -9,7 +9,7 @@ xx: str = "NC"
 N: int = 14  # TODO - Get this from metadata
 C: int = 100  # TODO - Ditto
 
-compactness: bool = True
+compactness: bool = False
 
 #
 
