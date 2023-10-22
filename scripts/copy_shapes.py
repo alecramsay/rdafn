@@ -63,8 +63,6 @@ def main() -> None:
 
     working_dir: str = f"{data_dir}/{xx}"
 
-    output_path: str = path_to_file([data_dir, xx, shapes_file])
-
     os.chdir(working_dir)
     commands: list[str] = [
         f"cp -R {input_path} {shapes_file}/",
