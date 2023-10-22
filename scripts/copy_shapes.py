@@ -12,6 +12,8 @@ For documentation, type:
 
 $ scripts/copy_shapes.py -h
 
+NOTE - Not used. We extract a topology from the shapes instead. See scripts/extract_topo.py.
+
 """
 
 import os
