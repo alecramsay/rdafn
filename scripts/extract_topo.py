@@ -20,15 +20,19 @@ https://medium.com/p/388e1ace26f0
 https://github.com/topojson/topojson
 https://medium.com/@mbostock/command-line-cartography-part-1-897aa8f8ca2c
 https://medium.com/@mbostock/command-line-cartography-part-3-1158e4c55a1e
+https://github.com/topojson/topojson-client 
+
+https://pypi.org/project/calmjs/ | https://www.npmjs.com/package/topojson-client
+
 https://pypi.org/project/pytopojson/
 https://github.com/fferrin/pytopojson/blob/master/pytopojson/merge.py
-https://github.com/fferrin/pytopojson/blob/master/tests/test_merge.py
 
 Prerequisites:
 
 npm install -g shapefile
 npm install -g ndjson-cli
 npm install -g topojson
+npm install -g topojson-client
 
 """
 
