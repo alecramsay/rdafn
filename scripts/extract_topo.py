@@ -87,18 +87,19 @@ def main() -> None:
     ).abs_path
 
     # HACK to circumvent contention with Python scripts installed by pytopojson
-    node_path: str = f"{Path.home()}" + "/.nvm/versions/node/v18.16.0/bin"
+    # node_path: str = f"{Path.home()}" + "/.nvm/versions/node/v18.16.0/bin/"
+    node_path: str = ""
 
     temp_dir: str = FileSpec(path_to_file(["temp"])).abs_path
 
     # print(f"Current directory: {os.getcwd()}")
 
     commands: list[str] = [
-        f"{node_path}/shp2json {shapes_path}/{shapes_file}.shp -o {temp_dir}/{xx}_vtd.json",
-        f"{node_path}/ndjson-split 'd.features' < {temp_dir}/{xx}_vtd.json > {temp_dir}/{xx}_vtd.ndjson",
-        f"{node_path}/geo2topo -n collection={temp_dir}/{xx}_vtd.ndjson > {temp_dir}/{xx}_vtd_topo.json",
-        f"{node_path}/toposimplify -p 1 -f < {temp_dir}/{xx}_vtd_topo.json > {temp_dir}/{xx}_vtd_simple_topo.json",
-        f"{node_path}/topoquantize 1e5 < {temp_dir}/{xx}_vtd_simple_topo.json > {temp_dir}/{xx}_vtd_quantized_topo.json",
+        f"{node_path}shp2json {shapes_path}/{shapes_file}.shp -o {temp_dir}/{xx}_vtd.json",
+        f"{node_path}ndjson-split 'd.features' < {temp_dir}/{xx}_vtd.json > {temp_dir}/{xx}_vtd.ndjson",
+        f"{node_path}geo2topo -n collection={temp_dir}/{xx}_vtd.ndjson > {temp_dir}/{xx}_vtd_topo.json",
+        f"{node_path}toposimplify -p 1 -f < {temp_dir}/{xx}_vtd_topo.json > {temp_dir}/{xx}_vtd_simple_topo.json",
+        f"{node_path}topoquantize 1e5 < {temp_dir}/{xx}_vtd_simple_topo.json > {temp_dir}/{xx}_vtd_quantized_topo.json",
     ]
     for command in commands:
         # print(command)
