@@ -30,11 +30,6 @@ https://www.npmjs.com/package/topojson-server
 https://www.npmjs.com/package/topojson-client
 https://www.npmjs.com/package/topojson-simplify
 
-https://pypi.org/project/calmjs/ | https://www.npmjs.com/package/topojson-client
-
-https://pypi.org/project/pytopojson/
-https://github.com/fferrin/pytopojson/blob/master/pytopojson/merge.py
-
 Prerequisites:
 
 npm install -g shapefile
