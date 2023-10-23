@@ -17,10 +17,18 @@ References:
 https://medium.com/@terrycrowley/small-pleasures-of-programming-ae4f50dde67a
 https://medium.com/p/388e1ace26f0
 
-https://github.com/topojson/topojson
+https://github.com/topojson/topojson <<< Deprecated
+https://github.com/topojson/topojson-server
+https://github.com/topojson/topojson-client
+https://github.com/topojson/topojson-simplify
+
 https://medium.com/@mbostock/command-line-cartography-part-1-897aa8f8ca2c
 https://medium.com/@mbostock/command-line-cartography-part-3-1158e4c55a1e
-https://github.com/topojson/topojson-client 
+
+https://www.npmjs.com/package/topojson <<< Deprecated
+https://www.npmjs.com/package/topojson-server
+https://www.npmjs.com/package/topojson-client
+https://www.npmjs.com/package/topojson-simplify
 
 https://pypi.org/project/calmjs/ | https://www.npmjs.com/package/topojson-client
 
@@ -31,8 +39,12 @@ Prerequisites:
 
 npm install -g shapefile
 npm install -g ndjson-cli
-npm install -g topojson
+npm install -g topojson <<< Deprecated
+npm install -g topojson-server
 npm install -g topojson-client
+npm install -g topojson-simplify
+
+npm list -g --depth=0
 
 """
 
