@@ -27,6 +27,7 @@ def analyze_plan(
 
     print(f"Analyzing plan ...")
 
+    # TODO - Factor out into a helper function.
     ### FIELD NAMES ###
 
     total_pop_field: str = census_fields[0]
@@ -65,6 +66,7 @@ def analyze_plan(
         defaultdict(int) for _ in range(n_districts + 1)
     ]
 
+    # TODO - Factor into a helper function; results passed to analyze_plan().
     # For county-district splitting
 
     # NOTE - This could all be done once for all plans being analyzed.
