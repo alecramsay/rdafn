@@ -17,23 +17,10 @@ pip install javascript
 
 """
 
-from javascript import require
-from shapely.geometry import (
-    shape,
-    Polygon,
-    MultiPolygon,
-    Point,
-    MultiPoint,
-    LineString,
-    MultiLineString,
-    LinearRing,
-    GeometryCollection,
-)
-from typing import Any
-
 import rdapy as rda
 
 from rdafn import *
+
 
 xx: str = "NC"
 
@@ -46,16 +33,7 @@ assignments: list[dict[str, str | int]] = load_plan(plan_path)
 
 #
 
-district_shapes: list[
-    Point
-    | MultiPoint
-    | LineString
-    | MultiLineString
-    | Polygon
-    | MultiPolygon
-    | LinearRing
-    | GeometryCollection
-] = make_district_shapes(state_topo, assignments)
+district_shapes: list = make_district_shapes(state_topo, assignments)
 
 compactness_metrics: dict = rda.calc_compactness(district_shapes)
 print(compactness_metrics)

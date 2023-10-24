@@ -11,8 +11,6 @@ from geopandas import GeoDataFrame
 from .constants import *
 from .readwrite import *
 
-# from .datatypes import *
-
 
 def load_data(xx: str) -> dict[str, dict[str, int]]:
     """Load preprocessed census & election data."""
@@ -29,7 +27,7 @@ def load_data(xx: str) -> dict[str, dict[str, int]]:
 def load_topology(xx: str) -> dict[str, Any]:
     """Load the topology for a state."""
 
-    topo_dir: str = "temp"  # TODO
+    topo_dir: str = "temp"  # TODO - Point this at the right place.
 
     topo_path: str = f"{topo_dir}/{xx}_vtd_simple_topo.json"
     # topo_path: str = f"{topo_dir}/{xx}_vtd_topo.json"

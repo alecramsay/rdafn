@@ -4,13 +4,13 @@
 ANALYZE A PLAN
 """
 
+from collections import defaultdict
 import pandas as pd
 from geopandas import GeoDataFrame
 
 import rdapy as rda
 
 from .constants import *
-from .datatypes import *
 from .utils import *
 
 

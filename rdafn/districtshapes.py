@@ -9,12 +9,12 @@ from shapely.geometry import (
     shape,
     Polygon,
     MultiPolygon,
-    Point,
-    MultiPoint,
-    LineString,
-    MultiLineString,
-    LinearRing,
-    GeometryCollection,
+    # Point,
+    # MultiPoint,
+    # LineString,
+    # MultiLineString,
+    # LinearRing,
+    # GeometryCollection,
 )
 from collections import defaultdict
 from typing import Any
@@ -23,14 +23,14 @@ from typing import Any
 def make_district_shapes(
     topo: dict[str, Any], plan: list[dict[str, str | int]]
 ) -> list[
-    Point
-    | MultiPoint
-    | LineString
-    | MultiLineString
-    | Polygon
+    Polygon
     | MultiPolygon
-    | LinearRing
-    | GeometryCollection
+    # | Point
+    # | MultiPoint
+    # | LineString
+    # | MultiLineString
+    # | LinearRing
+    # | GeometryCollection
 ]:
     """Make district shapes from a topology and a plan."""
 
@@ -49,14 +49,14 @@ def make_district_shapes(
         precincts_by_district[district].add(geoid)
 
     district_shapes: list[
-        Point
-        | MultiPoint
-        | LineString
-        | MultiLineString
-        | Polygon
+        Polygon
         | MultiPolygon
-        | LinearRing
-        | GeometryCollection
+        # | Point
+        # | MultiPoint
+        # | LineString
+        # | MultiLineString
+        # | LinearRing
+        # | GeometryCollection
     ] = list()
 
     for i, precincts in precincts_by_district.items():
@@ -69,9 +69,10 @@ def make_district_shapes(
         merged_geojson: dict[str, Any] | None = topojson.merge(
             topo, district_features
         ).valueOf()
-        shp: Point | MultiPoint | LineString | MultiLineString | Polygon | MultiPolygon | LinearRing | GeometryCollection = shape(
-            merged_geojson
-        )
+        shp: Polygon | MultiPolygon = shape(merged_geojson)
+        # shp: Polygon | MultiPolygon | Point | MultiPoint | LineString | MultiLineString | LinearRing | GeometryCollection = shape(
+        #     merged_geojson
+        # )
         district_shapes.append(shp)
 
     return district_shapes
