@@ -16,8 +16,7 @@ from .utils import *
 
 @time_function
 def analyze_plan(
-    name: str,
-    assignments: list[dict[str, int]],
+    assignments: list[dict[str, str | int]],
     data: dict[str, dict[str, int]],
     shapes_df: pd.Series | pd.DataFrame | Any,
     n_districts: int,
@@ -26,7 +25,7 @@ def analyze_plan(
 ) -> dict[str, Any]:
     """Analyze a plan."""
 
-    print(f"Analyzing plan {name} ...")
+    print(f"Analyzing plan ...")
 
     ### FIELD NAMES ###
 
@@ -74,7 +73,7 @@ def analyze_plan(
 
     for row in assignments:
         precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
-        district: int = row["DISTRICT"] if "DISTRICT" in row else row["District"]
+        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
 
         county: str = GeoID(precinct).county[2:]
 
@@ -92,7 +91,7 @@ def analyze_plan(
 
     for row in assignments:
         precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
-        district: int = row["DISTRICT"] if "DISTRICT" in row else row["District"]
+        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
 
         # For population deviation
 

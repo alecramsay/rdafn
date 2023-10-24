@@ -10,7 +10,8 @@ from geopandas import GeoDataFrame
 
 from .constants import *
 from .readwrite import *
-from .datatypes import *
+
+# from .datatypes import *
 
 
 def load_data(xx: str) -> dict[str, dict[str, int]]:
@@ -25,6 +26,21 @@ def load_data(xx: str) -> dict[str, dict[str, int]]:
     return data
 
 
+def load_topology(xx: str) -> dict[str, Any]:
+    """Load the topology for a state."""
+
+    topo_dir: str = "temp"  # TODO
+
+    topo_path: str = f"{topo_dir}/{xx}_vtd_simple_topo.json"
+    # topo_path: str = f"{topo_dir}/{xx}_vtd_topo.json"
+    # topo_path: str = f"{topo_dir}/{xx}_vtd_quantized_topo.json"
+
+    topo: dict[str, Any] = read_json(topo_path)
+
+    return topo
+
+
+# NOTE - Use the topology instead.
 def load_shapes(xx: str) -> pd.Series | pd.DataFrame | Any:
     """Load the shapefile for a state."""
 
@@ -46,12 +62,12 @@ def load_shapes(xx: str) -> pd.Series | pd.DataFrame | Any:
     return precincts_df
 
 
-def load_plan(plan_file: str, name: Optional[str] = None) -> Plan:
+def load_plan(plan_file: str) -> list[dict[str, str | int]]:
     """Read a precinct-assignment file."""
 
-    plan: Plan = Plan(plan_file, name)
+    assignments: list[dict[str, str | int]] = read_csv(plan_file, [str, int])
 
-    return plan
+    return assignments
 
 
 ### END ###

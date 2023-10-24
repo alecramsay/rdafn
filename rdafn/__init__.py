@@ -3,7 +3,7 @@
 from .constants import *
 from .utils import *
 from .readwrite import *
-from .datatypes import *
+from .districtshapes import *
 from .load import *
 from .analyze import *
 
