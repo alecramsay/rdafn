@@ -27,11 +27,10 @@ def load_data(xx: str) -> dict[str, dict[str, int]]:
 def load_topology(xx: str) -> dict[str, Any]:
     """Load the topology for a state."""
 
-    topo_dir: str = "temp"  # TODO - Point this at the right place.
-
-    topo_path: str = f"{topo_dir}/{xx}_vtd_simple_topo.json"
-    # topo_path: str = f"{topo_dir}/{xx}_vtd_topo.json"
-    # topo_path: str = f"{topo_dir}/{xx}_vtd_quantized_topo.json"
+    topo_file: str = f"{xx}_vtd_simple_topo.json"
+    # topo_file: str = f"{xx}_vtd_topo.json"
+    # topo_file: str = f"{xx}_vtd_quantized_topo.json"
+    topo_path: str = path_to_file([data_dir, xx]) + topo_file
 
     topo: dict[str, Any] = read_json(topo_path)
 
