@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-#
-# SAMPLE CODE
-#
+
+"""
+SAMPLE CODE
+
+To run:
+
+$ ./sample.py
+"""
 
 from rdafn import *
 
