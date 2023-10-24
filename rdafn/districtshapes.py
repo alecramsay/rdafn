@@ -2,6 +2,8 @@
 
 """
 MAKE DISTRICT SHAPEFILES
+
+https://pypi.org/project/geojson/
 """
 
 from javascript import require
@@ -19,6 +21,8 @@ from shapely.geometry import (
 from collections import defaultdict
 from typing import Any
 
+topojson = require("topojson-client")
+
 
 def make_district_shapes(
     topo: dict[str, Any], plan: list[dict[str, str | int]]
@@ -34,7 +38,6 @@ def make_district_shapes(
 ]:
     """Make district shapes from a topology and a plan."""
 
-    topojson = require("topojson-client")
     fc = topo["objects"]["collection"]["geometries"]
 
     feature_index: dict[str, int] = dict()
@@ -65,17 +68,25 @@ def make_district_shapes(
 
         district_features: list = [fc[i] for i in map(feature_index.get, precincts)]
 
-        # TODO - Factor this!
-        merged_geojson: dict[str, Any] | None = topojson.merge(
-            topo, district_features
-        ).valueOf()
+        merged_geojson: dict[str, Any] = merge_topology(topo, district_features)
+
+        # TODO - Clean up the shapes, if necessary.
+        # - Terry's correctGeometry
+        # - in district-analytics/src/_api.ts -- getGoodShapes()
+
         shp: Polygon | MultiPolygon = shape(merged_geojson)
-        # shp: Polygon | MultiPolygon | Point | MultiPoint | LineString | MultiLineString | LinearRing | GeometryCollection = shape(
-        #     merged_geojson
-        # )
+
         district_shapes.append(shp)
 
     return district_shapes
+
+
+def merge_topology(topo: dict[str, Any], features: list) -> dict[str, Any]:
+    """Merge features into a topology."""
+
+    merged_geojson: dict[str, Any] = topojson.merge(topo, features).valueOf()
+
+    return merged_geojson
 
 
 ### END ###
