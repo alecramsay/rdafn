@@ -5,8 +5,6 @@ ANALYZE A PLAN
 """
 
 from collections import defaultdict
-import pandas as pd
-from geopandas import GeoDataFrame
 
 import rdapy as rda
 
