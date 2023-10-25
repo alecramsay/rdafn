@@ -49,7 +49,7 @@ def analyze_plan(
     # For population deviation
 
     total_pop: int = 0
-    pop_by_district: defaultdict[int | str, int] = defaultdict(int)
+    pop_by_district: defaultdict[int, int] = defaultdict(int)
 
     ## For partisan metrics
 
@@ -136,19 +136,9 @@ def analyze_plan(
 
     ### CALCULATE ANALYTICS ###
 
-    scorecard: dict[str, Any] = dict()
-
-    ## Population deviation
-
-    max_pop: int = max(pop_by_district.values())
-    min_pop: int = min(pop_by_district.values())
-    target_pop: int = int(total_pop / n_districts)
-
-    deviation: float = rda.calc_population_deviation(max_pop, min_pop, target_pop)
-    scorecard["population_deviation"] = deviation
-
-    #
-
+    deviation: float = calc_population_deviation(
+        pop_by_district, total_pop, n_districts
+    )
     partisan_metrics: dict[str, float] = calc_partisan_metrics(
         total_d_votes, total_votes, d_by_district, tot_by_district
     )
@@ -158,12 +148,14 @@ def analyze_plan(
     compactness_metrics: dict[str, float] = calc_compactness_metrics(district_shapes)
     splitting_metrics: dict[str, float] = calc_splitting_metrics(CxD)
 
+    scorecard: dict[str, Any] = dict()
+    scorecard["population_deviation"] = deviation
     scorecard.update(partisan_metrics)
     scorecard.update(minority_metrics)
     scorecard.update(compactness_metrics)
     scorecard.update(splitting_metrics)
 
-    ## Ratings
+    ### RATE DIMENSIONS ###
 
     ratings: dict[str, int] = rate_dimensions(
         proportionality=(
@@ -192,6 +184,20 @@ def analyze_plan(
 
 
 ### HELPER FUNCTIONS ###
+
+
+def calc_population_deviation(
+    pop_by_district: defaultdict[int, int], total_pop: int, n_districts: int
+) -> float:
+    """Calculate population deviation."""
+
+    max_pop: int = max(pop_by_district.values())
+    min_pop: int = min(pop_by_district.values())
+    target_pop: int = int(total_pop / n_districts)
+
+    deviation: float = rda.calc_population_deviation(max_pop, min_pop, target_pop)
+
+    return deviation
 
 
 def calc_partisan_metrics(
