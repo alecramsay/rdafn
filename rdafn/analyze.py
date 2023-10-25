@@ -46,89 +46,27 @@ def analyze_plan(
 
     ### AGGREGATE DATA & SHAPES BY DISTRICT ###
 
-    # For population deviation
-
-    total_pop: int = 0
-    pop_by_district: defaultdict[int, int] = defaultdict(int)
-
-    ## For partisan metrics
-
-    total_votes: int = 0
-    total_d_votes: int = 0
-    d_by_district: dict[int, int] = defaultdict(int)
-    tot_by_district: dict[int, int] = defaultdict(int)
-    # d_by_district: defaultdict[int, int] = defaultdict(int)
-    # tot_by_district: defaultdict[int, int] = defaultdict(int)
-
-    # For minority opportunity metrics
-
-    demos_totals: dict[str, int] = defaultdict(int)
-    demos_by_district: list[dict[str, int]] = [
-        defaultdict(int) for _ in range(n_districts + 1)
-    ]
-
-    # For county-district splitting
-
-    CxD: list[list[float]] = [[0.0] * n_counties for _ in range(n_districts)]
-
-    for row in assignments:
-        precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
-        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
-
-        # For population deviation
-
-        pop: int = data[precinct][total_pop_field]
-        pop_by_district[district] += pop
-        total_pop += pop
-
-        # For partisan metrics
-
-        d: int = data[precinct][dem_votes_field]
-        tot: int = (
-            data[precinct][dem_votes_field] + data[precinct][rep_votes_field]
-        )  # NOTE - Two-party vote total
-
-        d_by_district[district] += d
-        total_d_votes += d
-
-        tot_by_district[district] += tot
-        total_votes += tot
-
-        # For minority opportunity metrics
-
-        for demo in census_fields[1:]:  # Everything except total population
-            demos_totals[demo] += data[precinct][demo]
-            demos_by_district[district][demo] += data[precinct][demo]
-
-        # For county-district splitting
-
-        county: str = GeoID(precinct).county[2:]
-
-        i: int = district_to_index[district]
-        j: int = county_to_index[county]
-
-        CxD[i][j] += pop
-
-    # Create district shapes for compactness calculations
-
     aggregates: dict[str, Any] = aggregate_data_by_district(
         assignments, data, n_districts, n_counties, county_to_index, district_to_index
     )
     district_shapes: list = make_district_shapes(topo, assignments)
 
-    ### CALCULATE ANALYTICS ###
+    ### CALCULATE THE METRICS ###
 
     deviation: float = calc_population_deviation(
-        pop_by_district, total_pop, n_districts
+        aggregates["pop_by_district"], aggregates["total_pop"], n_districts
     )
     partisan_metrics: dict[str, float] = calc_partisan_metrics(
-        total_d_votes, total_votes, d_by_district, tot_by_district
+        aggregates["total_d_votes"],
+        aggregates["total_votes"],
+        aggregates["d_by_district"],
+        aggregates["tot_by_district"],
     )
     minority_metrics: dict[str, float] = calc_minority_metrics(
-        demos_totals, demos_by_district, n_districts
+        aggregates["demos_totals"], aggregates["demos_by_district"], n_districts
     )
     compactness_metrics: dict[str, float] = calc_compactness_metrics(district_shapes)
-    splitting_metrics: dict[str, float] = calc_splitting_metrics(CxD)
+    splitting_metrics: dict[str, float] = calc_splitting_metrics(aggregates["CxD"])
 
     scorecard: dict[str, Any] = dict()
     scorecard["population_deviation"] = deviation
@@ -137,7 +75,7 @@ def analyze_plan(
     scorecard.update(compactness_metrics)
     scorecard.update(splitting_metrics)
 
-    ### RATE DIMENSIONS ###
+    ### RATE THE DIMENSIONS ###
 
     ratings: dict[str, int] = rate_dimensions(
         proportionality=(
