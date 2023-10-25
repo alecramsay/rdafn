@@ -2,6 +2,8 @@
 
 """
 READ/WRITE ROUTINES
+
+NOTE - I cloned from my alecramsay/pyutils repo, so I don't have to package that. 
 """
 
 import os

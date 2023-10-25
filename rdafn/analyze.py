@@ -4,30 +4,30 @@
 ANALYZE A PLAN
 """
 
+from collections import defaultdict
 import pandas as pd
 from geopandas import GeoDataFrame
 
 import rdapy as rda
 
 from .constants import *
-from .datatypes import *
 from .utils import *
+from .districtshapes import make_district_shapes
 
 
 @time_function
 def analyze_plan(
-    name: str,
-    assignments: list[dict[str, int]],
+    assignments: list[dict[str, str | int]],
     data: dict[str, dict[str, int]],
-    shapes_df: pd.Series | pd.DataFrame | Any,
+    topo: dict[str, Any],
     n_districts: int,
     n_counties: int,
-    compactness: bool = True,
 ) -> dict[str, Any]:
     """Analyze a plan."""
 
-    print(f"Analyzing plan {name} ...")
+    print(f"Analyzing plan ...")
 
+    # TODO - Factor out into a helper function.
     ### FIELD NAMES ###
 
     total_pop_field: str = census_fields[0]
@@ -66,6 +66,7 @@ def analyze_plan(
         defaultdict(int) for _ in range(n_districts + 1)
     ]
 
+    # TODO - Factor into a helper function; results passed to analyze_plan().
     # For county-district splitting
 
     # NOTE - This could all be done once for all plans being analyzed.
@@ -74,7 +75,7 @@ def analyze_plan(
 
     for row in assignments:
         precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
-        district: int = row["DISTRICT"] if "DISTRICT" in row else row["District"]
+        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
 
         county: str = GeoID(precinct).county[2:]
 
@@ -92,7 +93,7 @@ def analyze_plan(
 
     for row in assignments:
         precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
-        district: int = row["DISTRICT"] if "DISTRICT" in row else row["District"]
+        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
 
         # For population deviation
 
@@ -128,34 +129,9 @@ def analyze_plan(
 
         CxD[i][j] += pop
 
-    ### CREATE DISTRICT SHAPES FOR COMPACTNESS ###
+    # Create district shapes for compactness calculations
 
-    shapes: list[Any] = list()  # HACK
-    if compactness:
-        plan_df: pd.DataFrame = pd.DataFrame(assignments)
-        shape_geoid_field: str = "GEOID" if "GEOID" in plan_df.columns else "GEOID20"
-        shape_district_field: str = (
-            "DISTRICT" if "DISTRICT" in plan_df.columns else "District"
-        )
-        # assert isinstance(plan_df, pd.DataFrame) # TODO
-
-        shapes_df = shapes_df.merge(
-            plan_df,
-            how="left",
-            left_on="GEOID20",
-            right_on=shape_geoid_field,
-        )
-        shapes_df = shapes_df[["geometry", shape_geoid_field, shape_district_field]]
-        assert isinstance(shapes_df, GeoDataFrame)
-        del plan_df
-
-        districts_df = shapes_df.dissolve(by=shape_district_field, as_index=False)
-
-        unsorted_shapes: list[dict] = districts_df.to_dict("records")
-        sorted_shapes: list[dict] = sorted(
-            unsorted_shapes, key=lambda k: k[shape_district_field]
-        )
-        shapes = [s["geometry"] for s in sorted_shapes]  # discard the id
+    district_shapes: list = make_district_shapes(topo, assignments)
 
     ### CALCULATE ANALYTICS ###
 
@@ -281,21 +257,15 @@ def analyze_plan(
 
     ## Compactness
 
-    avg_reock: float = 1.0  # TODO - Remove this, when removing 'compactness' switch
-    avg_polsby: float = 1.0  # TODO
-    if compactness:
-        compactness_metrics: dict = rda.calc_compactness(shapes)
-        scorecard["reock"] = compactness_metrics["avgReock"]
-        scorecard["polsby_popper"] = compactness_metrics["avgPolsby"]
-        # Invert the KIWYSI rank (1-100, lower is better) to a score (0-100, higher is better)
-        scorecard["kiwysi"] = 100 - round(compactness_metrics["avgKIWYSI"]) + 1
+    compactness_metrics: dict = rda.calc_compactness(district_shapes)
+    scorecard["reock"] = compactness_metrics["avgReock"]
+    scorecard["polsby_popper"] = compactness_metrics["avgPolsby"]
+    # Invert the KIWYSI rank (1-100, lower is better) to a score (0-100, higher is better)
+    scorecard["kiwysi"] = 100 - round(compactness_metrics["avgKIWYSI"]) + 1
 
-        avg_reock: float = scorecard["reock"]
-        avg_polsby: float = scorecard["polsby_popper"]
-
-        # For rating
-        avg_reock: float = scorecard["reock"]
-        avg_polsby: float = scorecard["polsby_popper"]
+    # For rating
+    avg_reock: float = scorecard["reock"]
+    avg_polsby: float = scorecard["polsby_popper"]
 
     ## Splitting
 

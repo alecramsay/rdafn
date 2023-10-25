@@ -12,6 +12,8 @@ For documentation, type:
 
 $ scripts/copy_shapes.py -h
 
+NOTE - Not used. We extract a topology from the shapes instead. See scripts/extract_topo.py.
+
 """
 
 import os
@@ -62,8 +64,6 @@ def main() -> None:
     input_path: str = path_to_file([f"../../{shapes_dir}", xx, shapes_file])
 
     working_dir: str = f"{data_dir}/{xx}"
-
-    output_path: str = path_to_file([data_dir, xx, shapes_file])
 
     os.chdir(working_dir)
     commands: list[str] = [
