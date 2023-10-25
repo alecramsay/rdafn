@@ -111,6 +111,9 @@ def analyze_plan(
 
     # Create district shapes for compactness calculations
 
+    aggregates: dict[str, Any] = aggregate_data_by_district(
+        assignments, data, n_districts, n_counties, county_to_index, district_to_index
+    )
     district_shapes: list = make_district_shapes(topo, assignments)
 
     ### CALCULATE ANALYTICS ###
@@ -189,6 +192,86 @@ def index_counties_and_districts(assignments: list[dict[str, str | int]]) -> tup
     }
 
     return county_to_index, district_to_index
+
+
+def aggregate_data_by_district(
+    assignments: list[dict[str, str | int]],
+    data: dict[str, dict[str, int]],
+    n_districts: int,
+    n_counties: int,
+    county_to_index: dict[str, int],
+    district_to_index: dict[int, int],
+) -> dict[str, Any]:
+    """Aggregate census & election data by district."""
+
+    total_pop: int = 0
+    pop_by_district: defaultdict[int, int] = defaultdict(int)
+
+    total_votes: int = 0
+    total_d_votes: int = 0
+    d_by_district: dict[int, int] = defaultdict(int)
+    tot_by_district: dict[int, int] = defaultdict(int)
+    # d_by_district: defaultdict[int, int] = defaultdict(int)
+    # tot_by_district: defaultdict[int, int] = defaultdict(int)
+
+    demos_totals: dict[str, int] = defaultdict(int)
+    demos_by_district: list[dict[str, int]] = [
+        defaultdict(int) for _ in range(n_districts + 1)
+    ]
+
+    CxD: list[list[float]] = [[0.0] * n_counties for _ in range(n_districts)]
+
+    for row in assignments:
+        precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
+        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
+
+        # For population deviation
+
+        pop: int = data[precinct][total_pop_field]
+        pop_by_district[district] += pop
+        total_pop += pop
+
+        # For partisan metrics
+
+        d: int = data[precinct][dem_votes_field]
+        tot: int = (
+            data[precinct][dem_votes_field] + data[precinct][rep_votes_field]
+        )  # NOTE - Two-party vote total
+
+        d_by_district[district] += d
+        total_d_votes += d
+
+        tot_by_district[district] += tot
+        total_votes += tot
+
+        # For minority opportunity metrics
+
+        for demo in census_fields[1:]:  # Everything except total population
+            demos_totals[demo] += data[precinct][demo]
+            demos_by_district[district][demo] += data[precinct][demo]
+
+        # For county-district splitting
+
+        county: str = GeoID(precinct).county[2:]
+
+        i: int = district_to_index[district]
+        j: int = county_to_index[county]
+
+        CxD[i][j] += pop
+
+    aggregates: dict[str, Any] = {
+        "total_pop": total_pop,
+        "pop_by_district": pop_by_district,
+        "total_votes": total_votes,
+        "total_d_votes": total_d_votes,
+        "d_by_district": d_by_district,
+        "tot_by_district": tot_by_district,
+        "demos_totals": demos_totals,
+        "demos_by_district": demos_by_district,
+        "CxD": CxD,
+    }
+
+    return aggregates
 
 
 def calc_population_deviation(
