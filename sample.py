@@ -13,8 +13,17 @@ from rdafn import *
 # Specify a state and an ensemble of plans
 
 xx: str = "NC"
-root_plan: str = path_to_file([data_dir, xx]) + "NC20C_baseline_100.csv"
-ensemble: list[str] = [root_plan]
+ensemble: list[str] = [
+    path_to_file([data_dir, xx]) + x
+    for x in [
+        "NC20C_baseline_100.csv",
+        "NC20C_I000K01N14_vtd_assignments.csv",
+        "NC20C_I001K01N14_vtd_assignments.csv",
+        "NC20C_I002K01N14_vtd_assignments.csv",
+        "NC20C_I003K01N14_vtd_assignments.csv",
+        "NC20C_I004K01N14_vtd_assignments.csv",
+    ]
+]
 
 # Load the state
 
