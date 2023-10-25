@@ -147,84 +147,18 @@ def analyze_plan(
     deviation: float = rda.calc_population_deviation(max_pop, min_pop, target_pop)
     scorecard["population_deviation"] = deviation
 
-    ## Partisan metrics
+    #
 
-    Vf: float = total_d_votes / total_votes
-    Vf_array: list[float] = [
-        d / tot for d, tot in zip(d_by_district.values(), tot_by_district.values())
-    ]
-    scorecard["estimated_vote_pct"] = Vf
-
-    partisan_metrics: dict = rda.calc_partisan_metrics(Vf, Vf_array)
-
-    bias_metrics: dict = dict()
-
-    bias_metrics["pr_deviation"] = partisan_metrics["bias"]["deviation"]
-    bias_metrics["pr_seats"] = partisan_metrics["bias"]["bestS"]
-    bias_metrics["pr_pct"] = partisan_metrics["bias"]["bestSf"]
-    bias_metrics["estimated_seats"] = partisan_metrics["bias"]["estS"]
-    bias_metrics["estimated_seat_pct"] = partisan_metrics["bias"]["estSf"]
-    bias_metrics["fptp_seats"] = partisan_metrics["bias"]["fptpS"]
-
-    bias_metrics["disproportionality"] = partisan_metrics["bias"]["prop"]
-    bias_metrics["efficiency_gap"] = partisan_metrics["bias"]["eG"]
-    bias_metrics["gamma"] = partisan_metrics["bias"]["gamma"]
-
-    bias_metrics["seats_bias"] = partisan_metrics["bias"]["bS50"]
-    bias_metrics["votes_bias"] = partisan_metrics["bias"]["bV50"]
-    bias_metrics["geometric_seats_bias"] = partisan_metrics["bias"]["bSV"]
-    bias_metrics["global_symmetry"] = partisan_metrics["bias"]["gSym"]
-
-    bias_metrics["declination"] = partisan_metrics["bias"]["decl"]
-    bias_metrics["mean_median_statewide"] = partisan_metrics["bias"]["mMs"]
-    bias_metrics["mean_median_average_district"] = partisan_metrics["bias"]["mMd"]
-    bias_metrics["turnout_bias"] = partisan_metrics["bias"]["tOf"]
-    bias_metrics["lopsided_outcomes"] = partisan_metrics["bias"]["lO"]
-
-    scorecard.update(bias_metrics)
-
-    responsiveness_metrics: dict = dict()
-
-    responsiveness_metrics["competitive_districts"] = partisan_metrics[
-        "responsiveness"
-    ]["cD"]
-    responsiveness_metrics["competitive_district_pct"] = partisan_metrics[
-        "responsiveness"
-    ]["cDf"]
-
-    responsiveness_metrics["responsiveness"] = partisan_metrics["responsiveness"][
-        "littleR"
-    ]
-    responsiveness_metrics["responsive_districts"] = partisan_metrics["responsiveness"][
-        "rD"
-    ]
-    responsiveness_metrics["responsive_district_pct"] = partisan_metrics[
-        "responsiveness"
-    ]["rDf"]
-    responsiveness_metrics["overall_responsiveness"] = partisan_metrics[
-        "responsiveness"
-    ][
-        "bigR"
-    ]  # BIG 'R': Defined in Footnote 22 on P. 10
-    # responsiveness_metrics["minimal_inverse_responsiveness"] = partisan_metrics[
-    #     "responsiveness"
-    # ][
-    #     "mIR"
-    # ]  # zeta = (1 / r) - (1 / r_sub_max) : Eq. 5.2.1
-
-    scorecard.update(responsiveness_metrics)
-
-    scorecard["avg_dem_win_pct"] = partisan_metrics["averageDVf"]
-    scorecard["avg_rep_win_pct"] = (
-        1.0 - partisan_metrics["averageRVf"]
-    )  # Invert the D % to get the R %.
-
+    partisan_metrics: dict[str, float] = calc_partisan_metrics(
+        total_d_votes, total_votes, d_by_district, tot_by_district
+    )
     minority_metrics: dict[str, float] = calc_minority_metrics(
         demos_totals, demos_by_district, n_districts
     )
     compactness_metrics: dict[str, float] = calc_compactness_metrics(district_shapes)
     splitting_metrics: dict[str, float] = calc_splitting_metrics(CxD)
 
+    scorecard.update(partisan_metrics)
     scorecard.update(minority_metrics)
     scorecard.update(compactness_metrics)
     scorecard.update(splitting_metrics)
@@ -258,6 +192,69 @@ def analyze_plan(
 
 
 ### HELPER FUNCTIONS ###
+
+
+def calc_partisan_metrics(
+    total_d_votes: int,
+    total_votes: int,
+    d_by_district: dict[int, int],
+    tot_by_district: dict[int, int],
+) -> dict[str, float]:
+    """Calulate partisan metrics."""
+
+    partisan_metrics: dict[str, float] = dict()
+
+    Vf: float = total_d_votes / total_votes
+    Vf_array: list[float] = [
+        d / tot for d, tot in zip(d_by_district.values(), tot_by_district.values())
+    ]
+    partisan_metrics["estimated_vote_pct"] = Vf
+
+    all_results: dict = rda.calc_partisan_metrics(Vf, Vf_array)
+
+    partisan_metrics["pr_deviation"] = all_results["bias"]["deviation"]
+    partisan_metrics["pr_seats"] = all_results["bias"]["bestS"]
+    partisan_metrics["pr_pct"] = all_results["bias"]["bestSf"]
+    partisan_metrics["estimated_seats"] = all_results["bias"]["estS"]
+    partisan_metrics["estimated_seat_pct"] = all_results["bias"]["estSf"]
+    partisan_metrics["fptp_seats"] = all_results["bias"]["fptpS"]
+
+    partisan_metrics["disproportionality"] = all_results["bias"]["prop"]
+    partisan_metrics["efficiency_gap"] = all_results["bias"]["eG"]
+    partisan_metrics["gamma"] = all_results["bias"]["gamma"]
+
+    partisan_metrics["seats_bias"] = all_results["bias"]["bS50"]
+    partisan_metrics["votes_bias"] = all_results["bias"]["bV50"]
+    partisan_metrics["geometric_seats_bias"] = all_results["bias"]["bSV"]
+    partisan_metrics["global_symmetry"] = all_results["bias"]["gSym"]
+
+    partisan_metrics["declination"] = all_results["bias"]["decl"]
+    partisan_metrics["mean_median_statewide"] = all_results["bias"]["mMs"]
+    partisan_metrics["mean_median_average_district"] = all_results["bias"]["mMd"]
+    partisan_metrics["turnout_bias"] = all_results["bias"]["tOf"]
+    partisan_metrics["lopsided_outcomes"] = all_results["bias"]["lO"]
+
+    partisan_metrics["competitive_districts"] = all_results["responsiveness"]["cD"]
+    partisan_metrics["competitive_district_pct"] = all_results["responsiveness"]["cDf"]
+
+    partisan_metrics["responsiveness"] = all_results["responsiveness"]["littleR"]
+    partisan_metrics["responsive_districts"] = all_results["responsiveness"]["rD"]
+    partisan_metrics["responsive_district_pct"] = all_results["responsiveness"]["rDf"]
+    partisan_metrics["overall_responsiveness"] = all_results["responsiveness"][
+        "bigR"
+    ]  # BIG 'R': Defined in Footnote 22 on P. 10
+    # partisan_metrics["minimal_inverse_responsiveness"] = all_results[
+    #     "responsiveness"
+    # ][
+    #     "mIR"
+    # ]  # zeta = (1 / r) - (1 / r_sub_max) : Eq. 5.2.1
+
+    partisan_metrics["avg_dem_win_pct"] = all_results["averageDVf"]
+    partisan_metrics["avg_rep_win_pct"] = (
+        1.0 - all_results["averageRVf"]
+    )  # Invert the D % to get the R %.
+
+    return partisan_metrics
 
 
 def calc_minority_metrics(
