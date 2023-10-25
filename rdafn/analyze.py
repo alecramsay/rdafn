@@ -39,12 +39,12 @@ def analyze_plan(
     topo: dict[str, Any],
     n_districts: int,
     n_counties: int,
+    county_to_index: dict[str, int],
+    district_to_index: dict[int, int],
 ) -> dict[str, Any]:
     """Analyze a plan."""
 
-    print(f"Analyzing plan ...")
-
-    ### AGGREGATE DATA BY DISTRICT ###
+    ### AGGREGATE DATA & SHAPES BY DISTRICT ###
 
     # For population deviation
 
@@ -67,28 +67,7 @@ def analyze_plan(
         defaultdict(int) for _ in range(n_districts + 1)
     ]
 
-    # TODO - Factor into a helper function; results passed to analyze_plan().
     # For county-district splitting
-
-    # NOTE - This could all be done once for all plans being analyzed.
-    counties: set[str] = set()
-    districts: set[int | str] = set()
-
-    for row in assignments:
-        precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
-        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
-
-        county: str = GeoID(precinct).county[2:]
-
-        counties.add(county)
-        districts.add(district)
-
-    county_to_index: dict[str, int] = {county: i for i, county in enumerate(counties)}
-    district_to_index: dict[int | str, int] = {
-        district: i for i, district in enumerate(districts)
-    }
-
-    # End NOTE
 
     CxD: list[list[float]] = [[0.0] * n_counties for _ in range(n_districts)]
 
@@ -184,6 +163,32 @@ def analyze_plan(
 
 
 ### HELPER FUNCTIONS ###
+
+
+def index_counties_and_districts(assignments: list[dict[str, str | int]]) -> tuple:
+    """Index counties and districts.
+
+    NOTE - This only needs to be done once per batch of plans being analyzed for a state.
+    """
+
+    counties: set[str] = set()
+    districts: set[int] = set()
+
+    for row in assignments:
+        precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
+        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
+
+        county: str = GeoID(precinct).county[2:]
+
+        counties.add(county)
+        districts.add(district)
+
+    county_to_index: dict[str, int] = {county: i for i, county in enumerate(counties)}
+    district_to_index: dict[int, int] = {
+        district: i for i, district in enumerate(districts)
+    }
+
+    return county_to_index, district_to_index
 
 
 def calc_population_deviation(
