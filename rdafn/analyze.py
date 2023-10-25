@@ -152,6 +152,7 @@ def analyze_plan(
     Vf_array: list[float] = [
         d / tot for d, tot in zip(d_by_district.values(), tot_by_district.values())
     ]
+    scorecard["estimated_vote_pct"] = Vf
 
     partisan_metrics: dict = rda.calc_partisan_metrics(Vf, Vf_array)
 
@@ -180,10 +181,6 @@ def analyze_plan(
     bias_metrics["lopsided_outcomes"] = partisan_metrics["bias"]["lO"]
 
     scorecard.update(bias_metrics)
-
-    # For rating
-    disproportionality: float = scorecard["disproportionality"]
-    Sf: float = scorecard["estimated_seat_pct"]
 
     responsiveness_metrics: dict = dict()
 
@@ -221,9 +218,6 @@ def analyze_plan(
         1.0 - partisan_metrics["averageRVf"]
     )  # Invert the D % to get the R %.
 
-    # For rating
-    cdf: float = scorecard["competitive_district_pct"]
-
     ## Minority
 
     statewide_demos: dict[str, float] = dict()
@@ -249,12 +243,6 @@ def analyze_plan(
     )
     scorecard.update(minority_metrics)
 
-    # For rating
-    od: float = scorecard["opportunity_districts"]
-    pod: float = scorecard["proportional_opportunities"]
-    cd: float = scorecard["coalition_districts"]
-    pcd: float = scorecard["proportional_coalitions"]
-
     ## Compactness
 
     compactness_metrics: dict = rda.calc_compactness(district_shapes)
@@ -262,10 +250,6 @@ def analyze_plan(
     scorecard["polsby_popper"] = compactness_metrics["avgPolsby"]
     # Invert the KIWYSI rank (1-100, lower is better) to a score (0-100, higher is better)
     scorecard["kiwysi"] = 100 - round(compactness_metrics["avgKIWYSI"]) + 1
-
-    # For rating
-    avg_reock: float = scorecard["reock"]
-    avg_polsby: float = scorecard["polsby_popper"]
 
     ## Splitting
 
@@ -275,24 +259,63 @@ def analyze_plan(
     # NOTE - The simple # of counties split unexpectedly is computed in dra2020/district-analytics,
     # i.e., not in dra2020/dra-analytics in the analytics proper.
 
-    # For rating
-    county_splitting: float = scorecard["county_splitting"]
-    district_splitting: float = scorecard["district_splitting"]
-
     ## Ratings
+
+    ratings: dict[str, int] = rate_dimensions(
+        (
+            scorecard["disproportionality"],
+            scorecard["estimated_vote_pct"],
+            scorecard["estimated_seat_pct"],
+        ),
+        (scorecard["competitive_district_pct"],),
+        (
+            scorecard["opportunity_districts"],
+            scorecard["proportional_opportunities"],
+            scorecard["coalition_districts"],
+            scorecard["proportional_coalitions"],
+        ),
+        (scorecard["reock"], scorecard["polsby_popper"]),
+        (
+            scorecard["county_splitting"],
+            scorecard["district_splitting"],
+            n_counties,
+            n_districts,
+        ),
+    )
+    scorecard.update(ratings)
+
+    return scorecard
+
+
+### HELPER FUNCTIONS ###
+
+
+def rate_dimensions(
+    proportionality: tuple,
+    competitiveness: tuple,
+    minority: tuple,
+    compactness: tuple,
+    splitting: tuple,
+) -> dict[str, int]:
+    """Rate the dimensions of a plan."""
 
     ratings: dict[str, int] = dict()
 
+    disproportionality, Vf, Sf = proportionality
     ratings["proportionality"] = rda.rate_proportionality(disproportionality, Vf, Sf)
 
+    cdf = competitiveness[0]
     ratings["competitiveness"] = rda.rate_competitiveness(cdf)
 
+    od, pod, cd, pcd = minority
     ratings["minority"] = rda.rate_minority_opportunity(od, pod, cd, pcd)
 
+    avg_reock, avg_polsby = compactness
     reock_rating: int = rda.rate_reock(avg_reock)
     polsby_rating: int = rda.rate_polsby(avg_polsby)
     ratings["compactness"] = rda.rate_compactness(reock_rating, polsby_rating)
 
+    county_splitting, district_splitting, n_counties, n_districts = splitting
     county_rating: int = rda.rate_county_splitting(
         county_splitting, n_counties, n_districts
     )
@@ -301,9 +324,7 @@ def analyze_plan(
     )
     ratings["splitting"] = rda.rate_splitting(county_rating, district_rating)
 
-    scorecard.update(ratings)
-
-    return scorecard
+    return ratings
 
 
 ### END ###
