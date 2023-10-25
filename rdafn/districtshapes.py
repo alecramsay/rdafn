@@ -63,16 +63,10 @@ def make_district_shapes(
     ] = list()
 
     for i, precincts in precincts_by_district.items():
-        if i == 6:  # TODO - Fix this!
-            continue
-
         district_features: list = [fc[i] for i in map(feature_index.get, precincts)]
 
         merged_geojson: dict[str, Any] = merge_topology(topo, district_features)
-
-        # TODO - Clean up the shapes, if necessary.
-        # - Terry's correctGeometry
-        # - in district-analytics/src/_api.ts -- getGoodShapes()
+        merged_geojson = correct_geometry(merged_geojson)
 
         shp: Polygon | MultiPolygon = shape(merged_geojson)
 
@@ -87,6 +81,15 @@ def merge_topology(topo: dict[str, Any], features: list) -> dict[str, Any]:
     merged_geojson: dict[str, Any] = topojson.merge(topo, features).valueOf()
 
     return merged_geojson
+
+
+def correct_geometry(poly: dict[str, Any]) -> dict[str, Any]:
+    """Correct the geometry of a polygon."""
+
+    # TODO - Terry's correctGeometry
+    # TODO - Also, in district-analytics/src/_api.ts -- getGoodShapes()
+
+    return poly
 
 
 ### END ###
