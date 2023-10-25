@@ -14,6 +14,23 @@ from .constants import *
 from .utils import *
 from .districtshapes import make_district_shapes
 
+### FIELD NAMES ###
+
+total_pop_field: str = census_fields[0]
+total_vap_field: str = census_fields[1]
+# white_vap_field: str = census_fields[2]
+# hispanic_vap_field: str = census_fields[3]
+# black_vap_field: str = census_fields[4]
+# native_vap_field: str = census_fields[5]
+# asian_vap_field: str = census_fields[6]
+# pacific_vap_field: str = census_fields[7]
+# minority_vap_field: str = census_fields[8]
+
+# total_votes_field: str = election_fields[0]
+rep_votes_field: str = election_fields[1]
+dem_votes_field: str = election_fields[2]
+# oth_votes_field: str = election_fields[3]
+
 
 @time_function
 def analyze_plan(
@@ -27,24 +44,6 @@ def analyze_plan(
 
     print(f"Analyzing plan ...")
 
-    # TODO - Factor out into a helper function.
-    ### FIELD NAMES ###
-
-    total_pop_field: str = census_fields[0]
-    total_vap_field: str = census_fields[1]
-    # white_vap_field: str = census_fields[2]
-    # hispanic_vap_field: str = census_fields[3]
-    # black_vap_field: str = census_fields[4]
-    # native_vap_field: str = census_fields[5]
-    # asian_vap_field: str = census_fields[6]
-    # pacific_vap_field: str = census_fields[7]
-    # minority_vap_field: str = census_fields[8]
-
-    # total_votes_field: str = election_fields[0]
-    rep_votes_field: str = election_fields[1]
-    dem_votes_field: str = election_fields[2]
-    # oth_votes_field: str = election_fields[3]
-
     ### AGGREGATE DATA BY DISTRICT ###
 
     # For population deviation
@@ -56,8 +55,10 @@ def analyze_plan(
 
     total_votes: int = 0
     total_d_votes: int = 0
-    d_by_district: defaultdict[int | str, int] = defaultdict(int)
-    tot_by_district: defaultdict[int | str, int] = defaultdict(int)
+    d_by_district: dict[int, int] = defaultdict(int)
+    tot_by_district: dict[int, int] = defaultdict(int)
+    # d_by_district: defaultdict[int, int] = defaultdict(int)
+    # tot_by_district: defaultdict[int, int] = defaultdict(int)
 
     # For minority opportunity metrics
 
@@ -218,7 +219,53 @@ def analyze_plan(
         1.0 - partisan_metrics["averageRVf"]
     )  # Invert the D % to get the R %.
 
-    ## Minority
+    minority_metrics: dict[str, float] = calc_minority_metrics(
+        demos_totals, demos_by_district, n_districts
+    )
+    compactness_metrics: dict[str, float] = calc_compactness_metrics(district_shapes)
+    splitting_metrics: dict[str, float] = calc_splitting_metrics(CxD)
+
+    scorecard.update(minority_metrics)
+    scorecard.update(compactness_metrics)
+    scorecard.update(splitting_metrics)
+
+    ## Ratings
+
+    ratings: dict[str, int] = rate_dimensions(
+        proportionality=(
+            scorecard["disproportionality"],
+            scorecard["estimated_vote_pct"],
+            scorecard["estimated_seat_pct"],
+        ),
+        competitiveness=(scorecard["competitive_district_pct"],),
+        minority=(
+            scorecard["opportunity_districts"],
+            scorecard["proportional_opportunities"],
+            scorecard["coalition_districts"],
+            scorecard["proportional_coalitions"],
+        ),
+        compactness=(scorecard["reock"], scorecard["polsby_popper"]),
+        splitting=(
+            scorecard["county_splitting"],
+            scorecard["district_splitting"],
+            n_counties,
+            n_districts,
+        ),
+    )
+    scorecard.update(ratings)
+
+    return scorecard
+
+
+### HELPER FUNCTIONS ###
+
+
+def calc_minority_metrics(
+    demos_totals: dict[str, int],
+    demos_by_district: list[dict[str, int]],
+    n_districts: int,
+) -> dict[str, float]:
+    """Calculate minority metrics."""
 
     statewide_demos: dict[str, float] = dict()
     for demo in census_fields[2:]:  # Skip total population & total VAP
@@ -241,56 +288,41 @@ def analyze_plan(
     minority_metrics: dict[str, float] = rda.calc_minority_opportunity(
         statewide_demos, by_district
     )
-    scorecard.update(minority_metrics)
 
-    ## Compactness
+    return minority_metrics
 
-    compactness_metrics: dict = rda.calc_compactness(district_shapes)
-    scorecard["reock"] = compactness_metrics["avgReock"]
-    scorecard["polsby_popper"] = compactness_metrics["avgPolsby"]
+
+def calc_compactness_metrics(district_shapes: list) -> dict[str, float]:
+    """Calculate compactness metrics."""
+
+    all_results: dict[str, float] = rda.calc_compactness(district_shapes)
+
+    compactness_metrics: dict[str, float] = dict()
+    compactness_metrics["reock"] = all_results["avgReock"]
+    compactness_metrics["polsby_popper"] = all_results["avgPolsby"]
     # Invert the KIWYSI rank (1-100, lower is better) to a score (0-100, higher is better)
-    scorecard["kiwysi"] = 100 - round(compactness_metrics["avgKIWYSI"]) + 1
+    compactness_metrics["kiwysi"] = 100 - round(all_results["avgKIWYSI"]) + 1
 
-    ## Splitting
+    return compactness_metrics
 
-    splitting_metrics: dict = rda.calc_county_district_splitting(CxD)
-    scorecard["county_splitting"] = splitting_metrics["county"]
-    scorecard["district_splitting"] = splitting_metrics["district"]
+
+def calc_splitting_metrics(CxD: list[list[float]]) -> dict[str, float]:
+    """Calculate county-district splitting metrics."""
+
+    all_results: dict[str, float] = rda.calc_county_district_splitting(CxD)
+
+    splitting_metrics: dict[str, float] = dict()
+    splitting_metrics["county_splitting"] = all_results["county"]
+    splitting_metrics["district_splitting"] = all_results["district"]
+
     # NOTE - The simple # of counties split unexpectedly is computed in dra2020/district-analytics,
     # i.e., not in dra2020/dra-analytics in the analytics proper.
 
-    ## Ratings
-
-    ratings: dict[str, int] = rate_dimensions(
-        (
-            scorecard["disproportionality"],
-            scorecard["estimated_vote_pct"],
-            scorecard["estimated_seat_pct"],
-        ),
-        (scorecard["competitive_district_pct"],),
-        (
-            scorecard["opportunity_districts"],
-            scorecard["proportional_opportunities"],
-            scorecard["coalition_districts"],
-            scorecard["proportional_coalitions"],
-        ),
-        (scorecard["reock"], scorecard["polsby_popper"]),
-        (
-            scorecard["county_splitting"],
-            scorecard["district_splitting"],
-            n_counties,
-            n_districts,
-        ),
-    )
-    scorecard.update(ratings)
-
-    return scorecard
-
-
-### HELPER FUNCTIONS ###
+    return splitting_metrics
 
 
 def rate_dimensions(
+    *,
     proportionality: tuple,
     competitiveness: tuple,
     minority: tuple,
