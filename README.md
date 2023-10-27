@@ -1,2 +1,3 @@
 # rdafn
-Redistricting analytics in Python exposed as an AWS lambda function
+
+Compute analytics for an ensemble of redistricting plans.
