@@ -1,0 +1,3 @@
+# Test
+
+pytest --disable-warnings

@@ -68,7 +68,7 @@ def make_district_shapes(
         merged_geojson: dict[str, Any] = merge_topology(topo, district_features)
         merged_geojson = correct_geometry(merged_geojson)
 
-        shp: Polygon | MultiPolygon = shape(merged_geojson)
+        shp: Polygon | MultiPolygon = geojson_to_shape(merged_geojson)
 
         district_shapes.append(shp)
 
@@ -90,6 +90,14 @@ def correct_geometry(poly: dict[str, Any]) -> dict[str, Any]:
     # TODO - Also, in district-analytics/src/_api.ts -- getGoodShapes()
 
     return poly
+
+
+def geojson_to_shape(geojson: dict[str, Any]) -> Polygon | MultiPolygon:
+    """Create a Shapely shape from GeoJSON."""
+
+    shp: Polygon | MultiPolygon = shape(geojson)
+
+    return shp
 
 
 ### END ###
