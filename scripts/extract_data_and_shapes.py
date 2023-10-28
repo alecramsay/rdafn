@@ -61,7 +61,8 @@ def main() -> None:
         "scripts/extract_census.py -s {xx}",
         "scripts/extract_elections.py -s {xx}",
         "scripts/join_data.py -s {xx}",
-        "scripts/copy_shapes.py -s {xx}",
+        "scripts/extract_topo.py -s {xx}",
+        # "scripts/copy_shapes.py -s {xx}",
     ]
 
     for command in commands:
