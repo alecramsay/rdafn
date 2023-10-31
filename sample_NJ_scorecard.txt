@@ -32,11 +32,11 @@ proportional_opportunities: 5
 coalition_districts: 7.651006344258192
 proportional_coalitions: 5
 reock: 0.48672361444840234
-polsby_popper: 0.3263570684180845
+polsby_popper: 0.32635706841808443
 kiwysi: 62
-county_splitting: 1.449201638649305
-district_splitting: 1.7135378871162055
-proportionality: 61 <<< 72???
+county_splitting: 1.4492016386493047
+district_splitting: 1.7135378871162057
+proportionality: 72
 competitiveness: 33
 minority: 60
 compactness: 76

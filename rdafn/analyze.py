@@ -77,7 +77,7 @@ def analyze_plan(
 
     ratings: dict[str, int] = rate_dimensions(
         proportionality=(
-            scorecard["disproportionality"],
+            scorecard["pr_deviation"],
             scorecard["estimated_vote_pct"],
             scorecard["estimated_seat_pct"],
         ),
