@@ -100,7 +100,8 @@ def main() -> None:
         f"shp2json {shapes_path}/{shapes_file}.shp -o {temp_dir}/{xx}_vtd.json",
         f"ndjson-split 'd.features' < {temp_dir}/{xx}_vtd.json > {temp_dir}/{xx}_vtd.ndjson",
         f"geo2topo -n collection={temp_dir}/{xx}_vtd.ndjson > {output_dir}/{xx}_vtd_topo.json",
-        f"toposimplify -p 1 -f < {output_dir}/{xx}_vtd_topo.json > {output_dir}/{xx}_vtd_simple_topo.json",
+        f"toposimplify -s 1E-10 -f < {output_dir}/{xx}_vtd_topo.json > {output_dir}/{xx}_vtd_simple_topo.json",
+        # f"toposimplify -p 1 -f < {output_dir}/{xx}_vtd_topo.json > {output_dir}/{xx}_vtd_simple_topo.json",
         f"topoquantize 1e5 < {output_dir}/{xx}_vtd_simple_topo.json > {output_dir}/{xx}_vtd_quantized_topo.json",
     ]
     for command in commands:
