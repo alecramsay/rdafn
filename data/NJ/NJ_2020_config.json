@@ -1,7 +1,7 @@
 {
     "census_suffix": "3",
     "geoid": "GEOID20",
-    "total": "Tot_2020_tot",
+    "total": "Tot_2020_adjtot",
     "demos": [
         "Tot_2020_vap",
         "Wh_2020_vap",
@@ -15,10 +15,10 @@
     "_comment1": "HACK: 2017_gov used twice to make composite calculations work",
     "elections": [
         "2016_pres",
+        "2017_gov",
+        "2018_sen",
         "2020_sen",
         "2020_pres",
-        "2018_sen",
-        "2017_gov",
-        "2017_gov"
+        "2021_gov"
     ]
 }
