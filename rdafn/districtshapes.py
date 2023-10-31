@@ -31,10 +31,11 @@ def make_district_shapes(
 ) -> list[Polygon | MultiPolygon]:
     """Make district shapes from a topology and a plan."""
 
-    geojson: list[dict[str, Any]] = merge_features(topo, plan)
-    geojson = [correct_geometry(x) for x in geojson]
+    district_geojsons: list[dict[str, Any]] = merge_features(topo, plan)
+    # district_geojsons = [correct_geometry(x) for x in district_geojsons] # TODO - Not implemented yet
+    # district_geojsons = [canonicalize_format(x) for x in district_geojsons] # TODO - Not implemented yet
     district_shapes: list[Polygon | MultiPolygon] = [
-        geojson_to_shape(x) for x in geojson
+        geojson_to_shape(x) for x in district_geojsons
     ]
 
     return district_shapes
@@ -78,10 +79,58 @@ def merge_topology(topo: dict[str, Any], features: list) -> dict[str, Any]:
 
 
 def correct_geometry(poly: dict[str, Any]) -> dict[str, Any]:
-    """Correct the geometry of a polygon."""
+    """Correct the geometry of a polygon.
 
     # TODO - Terry's correctGeometry
-    # TODO - Also, in district-analytics/src/_api.ts -- getGoodShapes()
+    """
+
+    return poly
+
+
+def canonicalize_format(poly: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize GeoJSON.
+
+    # TODO - Also, in district-analytics/src/_api.ts -- getGoodShapes():
+
+    getGoodShapes(): T.GeoFeatureCollection
+    {
+        const rawShapes = this.districts.getDistrictShapes();
+
+        // Filter the real shapes & throw everything else away
+        let goodShapes = {} as T.GeoFeatureCollection;
+        goodShapes['type'] = "FeatureCollection";
+        goodShapes['features'] = [] as T.GeoFeatureArray;
+
+        for (let i = 0; i < rawShapes.features.length; i++)
+        {
+        const shape: any = rawShapes.features[i];
+
+        if (isAShape(shape))
+        {
+            const d = Poly.polyDescribe(shape);
+
+            let f: any = {
+            type: 'Feature',
+            properties: {districtID: `${i + 1}`},
+            geometry: {
+                type: (d.npoly > 1) ? 'MultiPolygon' : 'Polygon',
+                coordinates: shape.geometry.coordinates
+            }
+            };
+            goodShapes.features.push(f);
+        }
+        }
+
+        return goodShapes;
+    }
+
+    function isAShape(poly: any): boolean
+    {
+        if (poly == null) return false;
+        if (Poly.polyNull(poly)) return false;
+        return poly.geometry && poly.geometry.coordinates && !U.isArrayEmpty(poly.geometry.coordinates);
+    }
+    """
 
     return poly
 

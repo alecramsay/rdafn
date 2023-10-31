@@ -13,19 +13,13 @@ $ scripts/debug.py -s NC
 import argparse
 from argparse import ArgumentParser, Namespace
 
-from shapely.geometry import (
-    shape,
-    Polygon,
-    MultiPolygon,
-    # Point,
-    # MultiPoint,
-    # LineString,
-    # MultiLineString,
-    # LinearRing,
-    # GeometryCollection,
-)
+# from shapely.geometry import (
+#     shape,
+#     Polygon,
+#     MultiPolygon,
+# )
 
-import rdapy as rda
+# import rdapy as rda
 from rdafn import *
 
 
@@ -59,47 +53,23 @@ def main() -> None:
 
     #
 
-    plan_path: str = os.path.expanduser(f"{data_dir}/{xx}/") + f"{xx}20C_baseline_100.csv")
+    plan_path: str = os.path.expanduser(
+        f"{data_dir}/{xx}/" + f"{xx}20C_baseline_100.csv"
+    )
     plan: list[dict[str, str | int]] = load_plan(plan_path)
 
-    state_topo: dict[str, Any] = load_topology(xx)
+    topo: dict[str, Any] = load_topology(xx)
     D: int = DISTRICTS_BY_STATE[xx]["congress"]
 
     #
 
-    shapes_path = "testdata/compactness/NC-116th-Congressional.geojson"
-    geojson = read_json(shapes_path)
+    district_geojsons: list[dict[str, Any]] = merge_features(topo, plan)
 
-    expected_path = "testdata/compactness/NC-116th-Congressional.json"
-    expected = read_json(expected_path)
-
-    district_shapes: list[
-        Polygon
-        | MultiPolygon
-        # | Point
-        # | MultiPoint
-        # | LineString
-        # | MultiLineString
-        # | LinearRing
-        # | GeometryCollection
-    ] = list()
-
-    for f in geojson["features"]:
-        shp: Polygon | MultiPolygon = geojson_to_shape(f["geometry"])
-
-        district_shapes.append(shp)
-
-    actual: dict = rda.calc_compactness(district_shapes)
-    x = actual["byDistrict"]
-
-    n_districts: int = len(actual["byDistrict"])
-
-    #
-
-    for k, v in actual.items():
-        print(f"{k}: {v}")
-
-    pass
+    for i, d in enumerate(district_geojsons):
+        output_path: str = os.path.expanduser(
+            f"~/Downloads/{xx}/" + f"{xx}_district_{i+1}.geojson"
+        )
+        write_json(output_path, d)
 
 
 if __name__ == "__main__":
