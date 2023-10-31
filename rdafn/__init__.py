@@ -2,7 +2,7 @@
 
 from .constants import *
 from .readwrite import *
-from .districtshapes import geojson_to_shape
+from .districtshapes import merge_features, correct_geometry, geojson_to_shape
 from .load import load_data, load_topology, load_plan
 from .analyze import (
     analyze_plan,

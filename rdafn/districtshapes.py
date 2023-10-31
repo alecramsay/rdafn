@@ -3,7 +3,9 @@
 """
 MAKE DISTRICT SHAPEFILES
 
-https://pypi.org/project/geojson/
+Potential resources:
+- https://pypi.org/project/geojson/
+
 """
 
 from javascript import require
@@ -26,17 +28,22 @@ topojson = require("topojson-client")
 
 def make_district_shapes(
     topo: dict[str, Any], plan: list[dict[str, str | int]]
-) -> list[
-    Polygon
-    | MultiPolygon
-    # | Point
-    # | MultiPoint
-    # | LineString
-    # | MultiLineString
-    # | LinearRing
-    # | GeometryCollection
-]:
+) -> list[Polygon | MultiPolygon]:
     """Make district shapes from a topology and a plan."""
+
+    geojson: list[dict[str, Any]] = merge_features(topo, plan)
+    geojson = [correct_geometry(x) for x in geojson]
+    district_shapes: list[Polygon | MultiPolygon] = [
+        geojson_to_shape(x) for x in geojson
+    ]
+
+    return district_shapes
+
+
+def merge_features(
+    topo: dict[str, Any], plan: list[dict[str, str | int]]
+) -> list[dict[str, Any]]:
+    """Merge precinct features into a district feature"""
 
     fc = topo["objects"]["collection"]["geometries"]
 
@@ -51,28 +58,15 @@ def make_district_shapes(
         district: int = int(row["DISTRICT"])
         precincts_by_district[district].add(geoid)
 
-    district_shapes: list[
-        Polygon
-        | MultiPolygon
-        # | Point
-        # | MultiPoint
-        # | LineString
-        # | MultiLineString
-        # | LinearRing
-        # | GeometryCollection
-    ] = list()
+    district_features: list[dict[str, Any]] = list()
 
     for i, precincts in precincts_by_district.items():
-        district_features: list = [fc[i] for i in map(feature_index.get, precincts)]
+        features: list = [fc[i] for i in map(feature_index.get, precincts)]
 
-        merged_geojson: dict[str, Any] = merge_topology(topo, district_features)
-        merged_geojson = correct_geometry(merged_geojson)
+        merged_geojson: dict[str, Any] = merge_topology(topo, features)
+        district_features.append(merged_geojson)
 
-        shp: Polygon | MultiPolygon = geojson_to_shape(merged_geojson)
-
-        district_shapes.append(shp)
-
-    return district_shapes
+    return district_features
 
 
 def merge_topology(topo: dict[str, Any], features: list) -> dict[str, Any]:
