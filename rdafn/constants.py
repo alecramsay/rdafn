@@ -34,6 +34,7 @@ election_fields: list[str] = ["TOT_VOTES", "REP_VOTES", "DEM_VOTES", "OTH_VOTES"
 ### PREPROCESSED DATA ###
 
 data_dir: str = "data"
+testdata_dir: str = "testdata"
 
 ### STATES ###
 

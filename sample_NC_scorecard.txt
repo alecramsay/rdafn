@@ -1,4 +1,4 @@
-Scorecard -- 10/31/23
+Scorecard -- 11/01/23
 population_deviation: 0.009084447543819651
 estimated_vote_pct: 0.49428163164010275
 pr_deviation: 0.04466970794342667
@@ -13,7 +13,7 @@ gamma: 0.01913308585110529
 seats_bias: 0.01883967993909254
 votes_bias: 0.0040789681179884685
 geometric_seats_bias: 0.01851184964030638
-global_symmetry: 2.242650509742816e-16
+global_symmetry: 0.00543444997078287
 declination: 2.3489297970396876
 mean_median_statewide: -0.007035949571299938
 mean_median_average_district: -0.007075784911803995
@@ -32,11 +32,11 @@ proportional_opportunities: 5
 coalition_districts: 7.32588951944269
 proportional_coalitions: 5
 reock: 0.49477789786324633
-polsby_popper: 0.3347356473480138
+polsby_popper: 0.33473564734801414
 kiwysi: 67
-county_splitting: 1.2739458821423986
+county_splitting: 1.2739458821423981
 district_splitting: 2.0700024487358384
-proportionality: 83
+proportionality: 81
 competitiveness: 56
 minority: 50
 compactness: 78
