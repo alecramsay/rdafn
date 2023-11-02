@@ -23,12 +23,12 @@ from shapely.geometry import (
 from collections import defaultdict
 from typing import Any
 
-# from .utils import *
+from .utils import *
 
 topojson = require("topojson-client")
 
 
-# @time_function
+@time_function
 def make_district_shapes(
     topo: dict[str, Any], plan: list[dict[str, str | int]]
 ) -> list[Polygon | MultiPolygon]:
@@ -44,6 +44,7 @@ def make_district_shapes(
     return district_shapes
 
 
+@time_function
 def merge_features(
     topo: dict[str, Any], plan: list[dict[str, str | int]]
 ) -> list[dict[str, Any]]:

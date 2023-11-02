@@ -319,6 +319,7 @@ def calc_minority_metrics(
     return minority_metrics
 
 
+@time_function
 def calc_compactness_metrics(district_shapes: list) -> dict[str, float]:
     """Calculate compactness metrics."""
 
