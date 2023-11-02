@@ -1,4 +1,4 @@
-Scorecard -- 11/01/23
+Scorecard -- 11/02/23
 population_deviation: 0.010946451839748496
 estimated_vote_pct: 0.5603691199087407
 pr_deviation: -0.11592947589110891
@@ -31,10 +31,9 @@ opportunity_districts: 1.0602556415175344
 proportional_opportunities: 5
 coalition_districts: 7.651006344258192
 proportional_coalitions: 5
-reock: 0.48672361444840245
-polsby_popper: 0.3263570684180848
-kiwysi: 62
-county_splitting: 1.449201638649305
+reock: 0.48672361444840234
+polsby_popper: 0.3263570684180844
+county_splitting: 1.4492016386493052
 district_splitting: 1.7135378871162057
 proportionality: 72
 competitiveness: 33

@@ -319,17 +319,17 @@ def calc_minority_metrics(
     return minority_metrics
 
 
-@time_function
+# @time_function
 def calc_compactness_metrics(district_shapes: list) -> dict[str, float]:
     """Calculate compactness metrics."""
 
-    all_results: dict[str, float] = rda.calc_compactness(district_shapes)
+    all_results: dict[str, float] = rda.calc_compactness(district_shapes, kiwysi=False)
 
     compactness_metrics: dict[str, float] = dict()
     compactness_metrics["reock"] = all_results["avgReock"]
     compactness_metrics["polsby_popper"] = all_results["avgPolsby"]
     # Invert the KIWYSI rank (1-100, lower is better) to a score (0-100, higher is better)
-    compactness_metrics["kiwysi"] = 100 - round(all_results["avgKIWYSI"]) + 1
+    # compactness_metrics["kiwysi"] = 100 - round(all_results["avgKIWYSI"]) + 1
 
     return compactness_metrics
 

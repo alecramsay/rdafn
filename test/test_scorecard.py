@@ -51,7 +51,7 @@ class TestScorecard:
                 "proportional_coalitions",
             ]
             approx_ints: list[str] = [
-                "kiwysi",
+                # "kiwysi", # Disabled due to large runtime cost
                 "proportionality",
                 "competitiveness",
                 "minority",
