@@ -32,7 +32,7 @@ dem_votes_field: str = election_fields[2]
 
 @time_function
 def analyze_plan(
-    assignments: list[dict[str, str | int]],
+    assignments: list[dict[str, int]],
     data: dict[str, dict[str, int]],
     topo: dict[str, Any],
     n_districts: int,
@@ -104,7 +104,7 @@ def analyze_plan(
 ### HELPER FUNCTIONS ###
 
 
-def index_counties_and_districts(assignments: list[dict[str, str | int]]) -> tuple:
+def index_counties_and_districts(assignments: list[dict[str, int]]) -> tuple:
     """Index counties and districts.
 
     NOTE - This only needs to be done once per batch of plans being analyzed for a state.
@@ -131,7 +131,7 @@ def index_counties_and_districts(assignments: list[dict[str, str | int]]) -> tup
 
 
 def aggregate_data_by_district(
-    assignments: list[dict[str, str | int]],
+    assignments: list[dict[str, int]],
     data: dict[str, dict[str, int]],
     n_districts: int,
     n_counties: int,

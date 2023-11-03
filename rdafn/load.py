@@ -33,10 +33,10 @@ def load_topology(xx: str) -> dict[str, Any]:
     return topo
 
 
-def load_plan(plan_file: str) -> list[dict[str, str | int]]:
+def load_plan(plan_file: str) -> list[dict[str, int]]:
     """Read a precinct-assignment file."""
 
-    assignments: list[dict[str, str | int]] = read_csv(plan_file, [str, int])
+    assignments: list[dict[str, int]] = read_csv(plan_file, [str, int])
 
     return assignments
 

@@ -36,7 +36,7 @@ state_topo: dict[str, Any] = load_topology(xx)
 D: int = DISTRICTS_BY_STATE[xx]["congress"]
 C: int = COUNTIES_BY_STATE[xx]
 
-sample: list[dict[str, str | int]] = load_plan(ensemble[0])
+sample: list[dict[str, int]] = load_plan(ensemble[0])
 county_to_index, district_to_index = index_counties_and_districts(sample)
 
 # Analyze each plan in the ensemble
@@ -44,7 +44,7 @@ county_to_index, district_to_index = index_counties_and_districts(sample)
 # You just need to do something with the resulting "scorecard".
 
 for plan_path in ensemble:
-    assignments: list[dict[str, str | int]] = load_plan(plan_path)
+    assignments: list[dict[str, int]] = load_plan(plan_path)
 
     scorecard: dict[str, Any] = analyze_plan(
         assignments,

@@ -56,7 +56,7 @@ def main() -> None:
     plan_path: str = os.path.expanduser(
         f"{data_dir}/{xx}/" + f"{xx}20C_baseline_100.csv"
     )
-    plan: list[dict[str, str | int]] = load_plan(plan_path)
+    plan: list[dict[str, int]] = load_plan(plan_path)
 
     topo: dict[str, Any] = load_topology(xx)
     D: int = DISTRICTS_BY_STATE[xx]["congress"]

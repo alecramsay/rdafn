@@ -23,10 +23,10 @@ class TestScorecard:
             D: int = DISTRICTS_BY_STATE[xx]["congress"]
             C: int = COUNTIES_BY_STATE[xx]
 
-            sample: list[dict[str, str | int]] = load_plan(plan_path)
+            sample: list[dict[str, int]] = load_plan(plan_path)
             county_to_index, district_to_index = index_counties_and_districts(sample)
 
-            assignments: list[dict[str, str | int]] = sample
+            assignments: list[dict[str, int]] = sample
 
             scorecard: dict[str, Any] = analyze_plan(
                 assignments,

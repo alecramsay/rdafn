@@ -30,7 +30,7 @@ topojson = require("topojson-client")
 
 @time_function
 def make_district_shapes(
-    topo: dict[str, Any], plan: list[dict[str, str | int]]
+    topo: dict[str, Any], plan: list[dict[str, int]]
 ) -> list[Polygon | MultiPolygon]:
     """Make district shapes from a topology and a plan."""
 
@@ -46,7 +46,7 @@ def make_district_shapes(
 
 @time_function
 def merge_features(
-    topo: dict[str, Any], plan: list[dict[str, str | int]]
+    topo: dict[str, Any], plan: list[dict[str, int]]
 ) -> list[dict[str, Any]]:
     """Merge precinct features into a district feature"""
 
