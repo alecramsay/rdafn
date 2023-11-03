@@ -228,12 +228,13 @@ def border_length(
     return arc_length
 
 
+@time_function
 def aggregate_shapes_by_district(
     assignments: list[dict[str, int]],
     shapes: dict[str, Any],
     graph: dict[str, list[str]],
     n_districts: int,
-) -> list[dict[str, Any]]:
+) -> list[dict[str, float]]:
     """Aggregate shape data by district for compactness calculations."""
 
     # Normalize the assignments & index districts by precinct
@@ -252,7 +253,7 @@ def aggregate_shapes_by_district(
 
     # Set up aggregates
 
-    props_by_district: list[dict[str, Any]] = [
+    by_district: list[dict[str, Any]] = [
         {"area": 0.0, "perimeter": 0.0, "exterior": list()}
         for _ in range(n_districts + 1)
     ]
@@ -263,17 +264,27 @@ def aggregate_shapes_by_district(
         geoid: str = row[geoid_field]
         district: int = row[district_field]
 
-        props_by_district[district]["area"] += shapes[geoid]["area"]
-        props_by_district[district]["perimeter"] += border_length(
+        by_district[district]["area"] += shapes[geoid]["area"]
+        by_district[district]["perimeter"] += border_length(
             geoid, district, district_by_geoid, shapes, graph
         )
-        props_by_district[district]["exterior"].extend(shapes[geoid]["exterior"])
+        by_district[district]["exterior"].extend(shapes[geoid]["exterior"])
 
-    # TODO - Calculate district diameters
+    # Calculate district diameters
 
-    props_by_district.pop(0)  # Remove the dummy district
+    implied_district_props: list[dict[str, float]] = []
+    for d in by_district[1:]:  # Remove the dummy district
+        _, _, r = rda.make_circle(d["exterior"])
 
-    return props_by_district
+        area: float = d["area"]
+        perimeter: float = d["perimeter"]
+        diameter: float = 2 * r
+
+        implied_district_props.append(
+            {"area:": area, "perimeter": perimeter, "diameter": diameter}
+        )
+
+    return implied_district_props
 
 
 def calc_population_deviation(
