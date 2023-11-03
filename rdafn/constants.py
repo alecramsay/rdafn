@@ -199,4 +199,8 @@ COUNTIES_BY_STATE: dict[str, int] = {
     "WY": 23,
 }
 
+### MISCELLANEOUS ###
+
+OUT_OF_STATE: str = "OUT_OF_STATE"
+
 ### END ###

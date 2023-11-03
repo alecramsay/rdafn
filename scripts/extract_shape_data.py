@@ -23,8 +23,6 @@ from shapely.geometry import Polygon, MultiPolygon
 
 from rdafn import *
 
-
-OUT_OF_STATE: str = "OUT_OF_STATE"
 EPSILON: float = 1.0e-12
 
 
@@ -121,7 +119,7 @@ def main() -> None:
     ### PICKLE THE DATA ###
 
     output_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "shape"], "_", "pickle"
+        [xx, cycle, "shapes"], "_", "pickle"
     )
     write_pickle(output_path, vtd_abstracts)
 

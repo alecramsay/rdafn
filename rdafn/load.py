@@ -20,6 +20,29 @@ def load_data(xx: str) -> dict[str, dict[str, int]]:
     return data
 
 
+def load_shapes(xx: str) -> dict[str, dict[str, Any]]:
+    """Load preprocessed shape data."""
+
+    pickle_path: str = path_to_file([data_dir, xx]) + file_name(
+        [xx, cycle, "shapes"], "_", "pickle"
+    )
+
+    shapes: dict[str, dict[str, Any]] = read_pickle(pickle_path)
+
+    return shapes
+
+
+def load_graph(xx: str) -> dict[str, list[str]]:
+    """Load the graph for a state."""
+
+    graph_path: str = path_to_file([data_dir, xx]) + file_name(
+        [xx, cycle, "graph"], "_", "json"
+    )
+    graph: dict[str, list[str]] = read_json(graph_path)
+
+    return graph
+
+
 def load_topology(xx: str) -> dict[str, Any]:
     """Load the topology for a state."""
 

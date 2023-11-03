@@ -32,36 +32,49 @@ ensemble: list[str] = [
 # This is boilerplate: nothing needs to change here.
 
 data: dict[str, dict[str, int]] = load_data(xx)
-state_topo: dict[str, Any] = load_topology(xx)
+shapes: dict[str, Any] = load_shapes(xx)
+graph: dict[str, list[str]] = load_graph(xx)
+
 D: int = DISTRICTS_BY_STATE[xx]["congress"]
 C: int = COUNTIES_BY_STATE[xx]
 
-sample: list[dict[str, int]] = load_plan(ensemble[0])
-county_to_index, district_to_index = index_counties_and_districts(sample)
+#
 
-# Analyze each plan in the ensemble
-# The looping and analytics call are boilerplate.
-# You just need to do something with the resulting "scorecard".
+assignments: list[dict[str, int]] = load_plan(ensemble[0])
 
-for plan_path in ensemble:
-    assignments: list[dict[str, int]] = load_plan(plan_path)
+district_props: list[dict[str, Any]] = aggregate_shapes_by_district(
+    assignments, shapes, graph, D
+)
 
-    scorecard: dict[str, Any] = analyze_plan(
-        assignments,
-        data,
-        state_topo,
-        D,
-        C,
-        county_to_index,
-        district_to_index,
-    )
-
-    # Do something with the resulting "scorecard"
-
-    print()
-    print(f"Scorecard:")
-    for metric in scorecard:
-        print(f"{metric}: {scorecard[metric]}")
-    print()
 
 pass
+
+# sample: list[dict[str, int]] = load_plan(ensemble[0])
+# county_to_index, district_to_index = index_counties_and_districts(sample)
+
+# # Analyze each plan in the ensemble
+# # The looping and analytics call are boilerplate.
+# # You just need to do something with the resulting "scorecard".
+
+# for plan_path in ensemble:
+#     assignments: list[dict[str, int]] = load_plan(plan_path)
+
+#     scorecard: dict[str, Any] = analyze_plan(
+#         assignments,
+#         data,
+#         state_topo,
+#         D,
+#         C,
+#         county_to_index,
+#         district_to_index,
+#     )
+
+#     # Do something with the resulting "scorecard"
+
+#     print()
+#     print(f"Scorecard:")
+#     for metric in scorecard:
+#         print(f"{metric}: {scorecard[metric]}")
+#     print()
+
+### END ###

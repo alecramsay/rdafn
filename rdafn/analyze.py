@@ -210,6 +210,72 @@ def aggregate_data_by_district(
     return aggregates
 
 
+def border_length(
+    geoid: str,
+    district: int,
+    district_by_geoid: dict[str, int],
+    shapes: dict[str, Any],
+    graph: dict[str, list[str]],
+) -> float:
+    """Sum the length of the border with another district or the state border."""
+
+    arc_length: float = 0.0
+
+    for n in graph[geoid]:
+        if (n == OUT_OF_STATE) or (district_by_geoid[n] != district):
+            arc_length += shapes[geoid]["arcs"][n]
+
+    return arc_length
+
+
+def aggregate_shapes_by_district(
+    assignments: list[dict[str, int]],
+    shapes: dict[str, Any],
+    graph: dict[str, list[str]],
+    n_districts: int,
+) -> list[dict[str, Any]]:
+    """Aggregate shape data by district for compactness calculations."""
+
+    # Normalize the assignments & index districts by precinct
+
+    plan: list[dict] = list()
+    district_by_geoid: dict[str, int] = dict()
+    geoid_field: str = "GEOID" if "GEOID" in assignments[0] else "GEOID20"
+    district_field: str = "DISTRICT" if "DISTRICT" in assignments[0] else "District"
+
+    for row in assignments:
+        precinct: str = str(row[geoid_field])
+        district: int = int(row[district_field])
+
+        plan.append({geoid_field: precinct, district_field: district})
+        district_by_geoid[precinct] = district
+
+    # Set up aggregates
+
+    props_by_district: list[dict[str, Any]] = [
+        {"area": 0.0, "perimeter": 0.0, "exterior": list()}
+        for _ in range(n_districts + 1)
+    ]
+
+    # Aggregate the shape properties
+
+    for row in plan:
+        geoid: str = row[geoid_field]
+        district: int = row[district_field]
+
+        props_by_district[district]["area"] += shapes[geoid]["area"]
+        props_by_district[district]["perimeter"] += border_length(
+            geoid, district, district_by_geoid, shapes, graph
+        )
+        props_by_district[district]["exterior"].extend(shapes[geoid]["exterior"])
+
+    # TODO - Calculate district diameters
+
+    props_by_district.pop(0)  # Remove the dummy district
+
+    return props_by_district
+
+
 def calc_population_deviation(
     pop_by_district: defaultdict[int, int], total_pop: int, n_districts: int
 ) -> float:
