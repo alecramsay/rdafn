@@ -34,6 +34,81 @@ dem_votes_field: str = election_fields[2]
 def analyze_plan(
     assignments: list[dict[str, int]],
     data: dict[str, dict[str, int]],
+    shapes: dict[str, Any],
+    graph: dict[str, list[str]],
+    n_districts: int,
+    n_counties: int,
+    county_to_index: dict[str, int],
+    district_to_index: dict[int, int],
+) -> dict[str, Any]:
+    """Analyze a plan."""
+
+    ### AGGREGATE DATA & SHAPES BY DISTRICT ###
+
+    aggregates: dict[str, Any] = aggregate_data_by_district(
+        assignments, data, n_districts, n_counties, county_to_index, district_to_index
+    )
+    district_props: list[dict[str, Any]] = aggregate_shapes_by_district(
+        assignments, shapes, graph, n_districts
+    )
+
+    ### CALCULATE THE METRICS ###
+
+    deviation: float = calc_population_deviation(
+        aggregates["pop_by_district"], aggregates["total_pop"], n_districts
+    )
+    partisan_metrics: dict[str, float] = calc_partisan_metrics(
+        aggregates["total_d_votes"],
+        aggregates["total_votes"],
+        aggregates["d_by_district"],
+        aggregates["tot_by_district"],
+    )
+    minority_metrics: dict[str, float] = calc_minority_metrics(
+        aggregates["demos_totals"], aggregates["demos_by_district"], n_districts
+    )
+    compactness_metrics: dict[str, float] = calc_compactness_metrics(district_props)
+    splitting_metrics: dict[str, float] = calc_splitting_metrics(aggregates["CxD"])
+
+    scorecard: dict[str, Any] = dict()
+    scorecard["population_deviation"] = deviation
+    scorecard.update(partisan_metrics)
+    scorecard.update(minority_metrics)
+    scorecard.update(compactness_metrics)
+    scorecard.update(splitting_metrics)
+
+    ### RATE THE DIMENSIONS ###
+
+    ratings: dict[str, int] = rate_dimensions(
+        proportionality=(
+            scorecard["pr_deviation"],
+            scorecard["estimated_vote_pct"],
+            scorecard["estimated_seat_pct"],
+        ),
+        competitiveness=(scorecard["competitive_district_pct"],),
+        minority=(
+            scorecard["opportunity_districts"],
+            scorecard["proportional_opportunities"],
+            scorecard["coalition_districts"],
+            scorecard["proportional_coalitions"],
+        ),
+        compactness=(scorecard["reock"], scorecard["polsby_popper"]),
+        splitting=(
+            scorecard["county_splitting"],
+            scorecard["district_splitting"],
+            n_counties,
+            n_districts,
+        ),
+    )
+    scorecard.update(ratings)
+
+    return scorecard
+
+
+# TODO - DELETE
+@time_function
+def analyze_plan_TOPO(
+    assignments: list[dict[str, int]],
+    data: dict[str, dict[str, int]],
     topo: dict[str, Any],
     n_districts: int,
     n_counties: int,
@@ -63,7 +138,9 @@ def analyze_plan(
     minority_metrics: dict[str, float] = calc_minority_metrics(
         aggregates["demos_totals"], aggregates["demos_by_district"], n_districts
     )
-    compactness_metrics: dict[str, float] = calc_compactness_metrics(district_shapes)
+    compactness_metrics: dict[str, float] = calc_compactness_metrics_TOPO(
+        district_shapes
+    )
     splitting_metrics: dict[str, float] = calc_splitting_metrics(aggregates["CxD"])
 
     scorecard: dict[str, Any] = dict()
@@ -281,7 +358,7 @@ def aggregate_shapes_by_district(
         diameter: float = 2 * r
 
         implied_district_props.append(
-            {"area:": area, "perimeter": perimeter, "diameter": diameter}
+            {"area": area, "perimeter": perimeter, "diameter": diameter}
         )
 
     return implied_district_props
@@ -396,8 +473,9 @@ def calc_minority_metrics(
     return minority_metrics
 
 
-# @time_function
-def calc_compactness_metrics(district_shapes: list) -> dict[str, float]:
+# TODO - DELETE
+@time_function
+def calc_compactness_metrics_TOPO(district_shapes: list) -> dict[str, float]:
     """Calculate compactness metrics."""
 
     all_results: dict[str, float] = rda.calc_compactness(district_shapes, kiwysi=False)
@@ -407,6 +485,32 @@ def calc_compactness_metrics(district_shapes: list) -> dict[str, float]:
     compactness_metrics["polsby_popper"] = all_results["avgPolsby"]
     # Invert the KIWYSI rank (1-100, lower is better) to a score (0-100, higher is better)
     # compactness_metrics["kiwysi"] = 100 - round(all_results["avgKIWYSI"]) + 1
+
+    return compactness_metrics
+
+
+@time_function
+def calc_compactness_metrics(
+    district_props: list[dict[str, float]]
+) -> dict[str, float]:
+    """Calculate compactness metrics using implied district props."""
+
+    tot_reock: float = 0
+    tot_polsby: float = 0
+
+    for i, d in enumerate(district_props):
+        reock: float = rda.reock_formula(d["area"], d["diameter"] / 2)
+        polsby: float = rda.polsby_formula(d["area"], d["perimeter"])
+
+        tot_reock += reock
+        tot_polsby += polsby
+
+    avg_reock: float = tot_reock / len(district_props)
+    avg_polsby: float = tot_polsby / len(district_props)
+
+    compactness_metrics: dict[str, float] = dict()
+    compactness_metrics["reock"] = avg_reock
+    compactness_metrics["polsby_popper"] = avg_polsby
 
     return compactness_metrics
 

@@ -8,6 +8,7 @@ from .analyze import (
     analyze_plan,
     index_counties_and_districts,
     calc_compactness_metrics,
+    calc_compactness_metrics_TOPO,  # TODO - Remove
     aggregate_shapes_by_district,  # TODO - Remove
 )
 

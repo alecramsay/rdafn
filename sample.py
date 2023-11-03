@@ -40,41 +40,40 @@ C: int = COUNTIES_BY_STATE[xx]
 
 #
 
-assignments: list[dict[str, int]] = load_plan(ensemble[0])
+# assignments: list[dict[str, int]] = load_plan(ensemble[0])
+# district_props: list[dict[str, Any]] = aggregate_shapes_by_district(
+#     assignments, shapes, graph, D
+# )
+# compactness_metrics: dict[str, float] = calc_compactness_metrics(district_props)
+# pass
 
-district_props: list[dict[str, Any]] = aggregate_shapes_by_district(
-    assignments, shapes, graph, D
-)
+sample: list[dict[str, int]] = load_plan(ensemble[0])
+county_to_index, district_to_index = index_counties_and_districts(sample)
 
+# Analyze each plan in the ensemble
+# The looping and analytics call are boilerplate.
+# You just need to do something with the resulting "scorecard".
 
-pass
+for plan_path in ensemble:
+    assignments: list[dict[str, int]] = load_plan(plan_path)
 
-# sample: list[dict[str, int]] = load_plan(ensemble[0])
-# county_to_index, district_to_index = index_counties_and_districts(sample)
+    scorecard: dict[str, Any] = analyze_plan(
+        assignments,
+        data,
+        shapes,
+        graph,
+        D,
+        C,
+        county_to_index,
+        district_to_index,
+    )
 
-# # Analyze each plan in the ensemble
-# # The looping and analytics call are boilerplate.
-# # You just need to do something with the resulting "scorecard".
+    # Do something with the resulting "scorecard"
 
-# for plan_path in ensemble:
-#     assignments: list[dict[str, int]] = load_plan(plan_path)
-
-#     scorecard: dict[str, Any] = analyze_plan(
-#         assignments,
-#         data,
-#         state_topo,
-#         D,
-#         C,
-#         county_to_index,
-#         district_to_index,
-#     )
-
-#     # Do something with the resulting "scorecard"
-
-#     print()
-#     print(f"Scorecard:")
-#     for metric in scorecard:
-#         print(f"{metric}: {scorecard[metric]}")
-#     print()
+    print()
+    print(f"Scorecard:")
+    for metric in scorecard:
+        print(f"{metric}: {scorecard[metric]}")
+    print()
 
 ### END ###
