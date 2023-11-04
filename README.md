@@ -21,7 +21,7 @@ See sample results from `analyze_plan()` in `sample_NC_scorecard.txt`.
 The data we use to score plans comes from the following sources:
 
 -   The total census population & VAP demographics data comes from the 2020_census_XX-N.csv
-    in the dra2020/vtd_data GitHub repository, 
+    in the DRA [vtd_data](https://github.com/dra2020/vtd_data) GitHub repository, 
     where XX is the state abbreviation and N is the suffix.
     We take the latest version of the data, which is the one with the highest N.
 -   The election data comes from the 2020_election_XX-N.csv in the same repo.
@@ -31,13 +31,13 @@ The data we use to score plans comes from the following sources:
 Some things to note:
 
 -   We've already created the precinct contiguity graphs as part of finding root map candidates
-    in the alecramsay/baseline GitHub repo,
-    and we're also already using the graph in the proebsting/ensembles repo
+    in my [baseline](https://github.com/alecramsay/baseline) GitHub repo,
+    and we're also already using the graph in Todd's [ensembles](https://github.com/proebsting/ensembles) repo
     to support generating spanning trees.
     So, by definition, the plans in the ensemble we will score are contiguous,
     i.e., we don't check that.
 -   While we used the official 2020 census total population data 
-    to generate the the root maps in the alecramsay/baseline repo,
+    to generate the the root maps in my [baseline](https://github.com/alecramsay/baseline) repo,
     as opposed to adjusted population data (if any), 
     we use the adjusted population data here to score ensemble plans.
 
@@ -45,9 +45,11 @@ Some things to note:
 
 With three exceptions noted next, `analyze_plan()` computes all the analytics that DRA does:
 
--   For a variety of reasons, the production TypeScript package (`dra2020/dra-analytics`) does not 
-    calculate a few minor things that show up in the UI. The Python port (`dra2020/rdafn`) does either.
-    This repo uses the latter, so those few things aren't in the "scorecard" output.
+-   For a variety of reasons, DRA's production TypeScript package 
+    (dra-analytics)[https://github.com/dra2020/dra-analytics] 
+    does not calculate a few minor things that show up in the UI. 
+    The Python port (rdafn)[https://github.com/dra2020/rdapy] does not either.
+    This repo uses the latter, so those few things also aren't in the "scorecard" output.
 -   To keep the results simple, district-level results are suppressed. The scorecard is a simple flat
     dictionary of metric key/value pairs.
 -   To maximize throughput KIWYSI compactness is not calculated. The simple naive approach to performing
