@@ -24,7 +24,7 @@ from shapely.geometry import Polygon, MultiPolygon
 from rdafn import *
 
 EPSILON: float = 1.0e-12
-THRESHOLD: float = 0.000255
+THRESHOLD: float = 0.000255  # more or less matches DRA simplification
 # THRESHOLD: float = 0.00026 # too high
 # THRESHOLD: float = 0.00025  # too low
 
