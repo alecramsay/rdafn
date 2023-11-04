@@ -25,7 +25,7 @@ The data we use to score plans comes from the following sources:
     where XX is the state abbreviation and N is the suffix.
     We take the latest version of the data, which is the one with the highest N.
 -   The election data comes from the 2020_election_XX-N.csv in the same repo.
--   The shapes are copies of tl_2020_FF_vtd20.zip from https://www2.census.gov/geo/tiger/TIGER2020PL/LAYER, 
+-   The shapes are copies of tl_2020_FF_vtd20.zip from [the Census Bureau](https://www2.census.gov/geo/tiger/TIGER2020PL/LAYER), 
     where FF is the state FIPS code, e.g., 37 for North Carolina.
 
 Some things to note:
@@ -34,8 +34,7 @@ Some things to note:
     in my [baseline](https://github.com/alecramsay/baseline) GitHub repo,
     and we're also already using the graph in Todd's [ensembles](https://github.com/proebsting/ensembles) repo
     to support generating spanning trees.
-    So, by definition, the plans in the ensemble we will score are contiguous,
-    i.e., we don't check that.
+    So, by definition, the plans in the ensemble we will score are contiguous&#8212;we don't check that.
 -   While we used the official 2020 census total population data 
     to generate the the root maps in my [baseline](https://github.com/alecramsay/baseline) repo,
     as opposed to adjusted population data (if any), 
@@ -46,9 +45,9 @@ Some things to note:
 With three exceptions noted next, `analyze_plan()` computes all the analytics that DRA does:
 
 -   For a variety of reasons, DRA's production TypeScript package 
-    (dra-analytics)[https://github.com/dra2020/dra-analytics] 
+    [dra-analytics](https://github.com/dra2020/dra-analytics) 
     does not calculate a few minor things that show up in the UI. 
-    The Python port (rdafn)[https://github.com/dra2020/rdapy] does not either.
+    The Python port [rdafn](https://github.com/dra2020/rdapy) does not either.
     This repo uses the latter, so those few things also aren't in the "scorecard" output.
 -   To keep the results simple, district-level results are suppressed. The scorecard is a simple flat
     dictionary of metric key/value pairs.
