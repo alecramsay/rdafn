@@ -14,7 +14,7 @@ from rdafn import *
 
 # Specify a state and an ensemble of plans
 
-xx: str = "NC"
+xx: str = "NJ"
 
 ensemble: list[str] = [
     os.path.expanduser(f"{data_dir}/{xx}/") + x
