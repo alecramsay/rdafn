@@ -24,6 +24,9 @@ from shapely.geometry import Polygon, MultiPolygon
 from rdafn import *
 
 EPSILON: float = 1.0e-12
+THRESHOLD: float = 0.000255
+# THRESHOLD: float = 0.00026 # too high
+# THRESHOLD: float = 0.00025  # too low
 
 
 def parse_args() -> Namespace:
@@ -37,6 +40,13 @@ def parse_args() -> Namespace:
         default="NC",
         help="The two-character state code (e.g., NC)",
         type=str,
+    )
+    parser.add_argument(
+        "-u",
+        "--unsimplified",
+        dest="unsimplified",
+        action="store_true",
+        help="Simplify mode",
     )
 
     parser.add_argument(
@@ -53,6 +63,7 @@ def main() -> None:
     args: Namespace = parse_args()
 
     xx: str = args.state
+    simplify: bool = not args.unsimplified
 
     verbose: bool = args.verbose
 
@@ -86,6 +97,9 @@ def main() -> None:
         geoid: str = item[0]
         shp: Polygon | MultiPolygon = item[1]
 
+        if simplify:
+            shp = shp.simplify(THRESHOLD, preserve_topology=True)
+
         area: float = shp.area
 
         arcs: dict[str, float] = dict()  # The shared border lengths by neighbor
@@ -118,9 +132,12 @@ def main() -> None:
 
     ### PICKLE THE DATA ###
 
-    output_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "shapes"], "_", "pickle"
+    pickle_name: str = (
+        f"{xx}_{cycle}_shapes_simplified.pickle"
+        if simplify
+        else f"{xx}_{cycle}_shapes.pickle"
     )
+    output_path: str = path_to_file([data_dir, xx]) + pickle_name
     write_pickle(output_path, vtd_abstracts)
 
 

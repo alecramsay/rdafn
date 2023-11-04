@@ -20,12 +20,15 @@ def load_data(xx: str) -> dict[str, dict[str, int]]:
     return data
 
 
-def load_shapes(xx: str) -> dict[str, dict[str, Any]]:
+def load_shapes(xx: str, simplified: bool = True) -> dict[str, dict[str, Any]]:
     """Load preprocessed shape data."""
 
-    pickle_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "shapes"], "_", "pickle"
+    pickle_name: str = (
+        f"{xx}_{cycle}_shapes_simplified.pickle"
+        if simplified
+        else f"{xx}_{cycle}_shapes.pickle"
     )
+    pickle_path: str = path_to_file([data_dir, xx]) + pickle_name
 
     shapes: dict[str, dict[str, Any]] = read_pickle(pickle_path)
 

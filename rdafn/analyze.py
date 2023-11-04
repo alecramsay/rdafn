@@ -294,12 +294,15 @@ def border_length(
     shapes: dict[str, Any],
     graph: dict[str, list[str]],
 ) -> float:
-    """Sum the length of the border with another district or the state border."""
+    """Sum the length of the border with other districts or the state border."""
 
     arc_length: float = 0.0
 
     for n in graph[geoid]:
-        if (n == OUT_OF_STATE) or (district_by_geoid[n] != district):
+        if n == OUT_OF_STATE:
+            if OUT_OF_STATE in shapes[geoid]["arcs"]:
+                arc_length += shapes[geoid]["arcs"][n]
+        elif district_by_geoid[n] != district:
             arc_length += shapes[geoid]["arcs"][n]
 
     return arc_length

@@ -2,8 +2,6 @@
 
 """
 READ/WRITE ROUTINES
-
-TODO - DELETE?
 """
 
 import os
