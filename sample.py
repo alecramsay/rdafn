@@ -45,25 +45,29 @@ county_to_index, district_to_index = index_counties_and_districts(sample)
 # You just need to do something with the resulting "scorecard".
 
 for plan_path in ensemble:
-    assignments: list[dict[str, int]] = load_plan(plan_path)
+    try:
+        assignments: list[dict[str, int]] = load_plan(plan_path)
 
-    scorecard: dict[str, Any] = analyze_plan(
-        assignments,
-        data,
-        shapes,
-        graph,
-        D,
-        C,
-        county_to_index,
-        district_to_index,
-    )
+        scorecard: dict[str, Any] = analyze_plan(
+            assignments,
+            data,
+            shapes,
+            graph,
+            D,
+            C,
+            county_to_index,
+            district_to_index,
+        )
 
-    # Do something with the resulting "scorecard"
+        # Do something with the resulting "scorecard"
 
-    print()
-    print(f"Scorecard:")
-    for metric in scorecard:
-        print(f"{metric}: {scorecard[metric]}")
-    print()
+        print()
+        print(f"Scorecard:")
+        for metric in scorecard:
+            print(f"{metric}: {scorecard[metric]}")
+        print()
+
+    except Exception as e:
+        print(f"Error analyzing {plan_path}: {e}")
 
 ### END ###

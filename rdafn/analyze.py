@@ -100,6 +100,23 @@ def analyze_plan(
     )
     scorecard.update(ratings)
 
+    ### TRIM THE FLOATING POINT RESULTS ###
+
+    precision: int = 4
+    int_metrics: list[str] = [
+        "pr_seats",
+        "proportional_opportunities",
+        "proportional_coalitions",
+        "proportionality",
+        "competitiveness",
+        "minority",
+        "compactness",
+        "splitting",
+    ]
+    for metric in scorecard:
+        if metric not in int_metrics:
+            scorecard[metric] = round(scorecard[metric], precision)
+
     return scorecard
 
 
