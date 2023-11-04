@@ -10,7 +10,6 @@ import rdapy as rda
 
 from .constants import *
 from .utils import *
-from .districtshapes import make_district_shapes
 
 ### FIELD NAMES ###
 
@@ -32,9 +31,10 @@ dem_votes_field: str = election_fields[2]
 
 @time_function
 def analyze_plan(
-    assignments: list[dict[str, str | int]],
+    assignments: list[dict[str, int]],
     data: dict[str, dict[str, int]],
-    topo: dict[str, Any],
+    shapes: dict[str, Any],
+    graph: dict[str, list[str]],
     n_districts: int,
     n_counties: int,
     county_to_index: dict[str, int],
@@ -47,7 +47,9 @@ def analyze_plan(
     aggregates: dict[str, Any] = aggregate_data_by_district(
         assignments, data, n_districts, n_counties, county_to_index, district_to_index
     )
-    district_shapes: list = make_district_shapes(topo, assignments)
+    district_props: list[dict[str, Any]] = aggregate_shapes_by_district(
+        assignments, shapes, graph, n_districts
+    )
 
     ### CALCULATE THE METRICS ###
 
@@ -63,7 +65,7 @@ def analyze_plan(
     minority_metrics: dict[str, float] = calc_minority_metrics(
         aggregates["demos_totals"], aggregates["demos_by_district"], n_districts
     )
-    compactness_metrics: dict[str, float] = calc_compactness_metrics(district_shapes)
+    compactness_metrics: dict[str, float] = calc_compactness_metrics(district_props)
     splitting_metrics: dict[str, float] = calc_splitting_metrics(aggregates["CxD"])
 
     scorecard: dict[str, Any] = dict()
@@ -104,7 +106,7 @@ def analyze_plan(
 ### HELPER FUNCTIONS ###
 
 
-def index_counties_and_districts(assignments: list[dict[str, str | int]]) -> tuple:
+def index_counties_and_districts(assignments: list[dict[str, int]]) -> tuple:
     """Index counties and districts.
 
     NOTE - This only needs to be done once per batch of plans being analyzed for a state.
@@ -131,7 +133,7 @@ def index_counties_and_districts(assignments: list[dict[str, str | int]]) -> tup
 
 
 def aggregate_data_by_district(
-    assignments: list[dict[str, str | int]],
+    assignments: list[dict[str, int]],
     data: dict[str, dict[str, int]],
     n_districts: int,
     n_counties: int,
@@ -208,6 +210,85 @@ def aggregate_data_by_district(
     }
 
     return aggregates
+
+
+def border_length(
+    geoid: str,
+    district: int,
+    district_by_geoid: dict[str, int],
+    shapes: dict[str, Any],
+    graph: dict[str, list[str]],
+) -> float:
+    """Sum the length of the border with other districts or the state border."""
+
+    arc_length: float = 0.0
+
+    for n in graph[geoid]:
+        if n == OUT_OF_STATE:
+            if OUT_OF_STATE in shapes[geoid]["arcs"]:
+                arc_length += shapes[geoid]["arcs"][n]
+        elif district_by_geoid[n] != district:
+            arc_length += shapes[geoid]["arcs"][n]
+
+    return arc_length
+
+
+def aggregate_shapes_by_district(
+    assignments: list[dict[str, int]],
+    shapes: dict[str, Any],
+    graph: dict[str, list[str]],
+    n_districts: int,
+) -> list[dict[str, float]]:
+    """Aggregate shape data by district for compactness calculations."""
+
+    # Normalize the assignments & index districts by precinct
+
+    plan: list[dict] = list()
+    district_by_geoid: dict[str, int] = dict()
+    geoid_field: str = "GEOID" if "GEOID" in assignments[0] else "GEOID20"
+    district_field: str = "DISTRICT" if "DISTRICT" in assignments[0] else "District"
+
+    for row in assignments:
+        precinct: str = str(row[geoid_field])
+        district: int = int(row[district_field])
+
+        plan.append({geoid_field: precinct, district_field: district})
+        district_by_geoid[precinct] = district
+
+    # Set up aggregates
+
+    by_district: list[dict[str, Any]] = [
+        {"area": 0.0, "perimeter": 0.0, "exterior": list()}
+        for _ in range(n_districts + 1)
+    ]
+
+    # Aggregate the shape properties
+
+    for row in plan:
+        geoid: str = row[geoid_field]
+        district: int = row[district_field]
+
+        by_district[district]["area"] += shapes[geoid]["area"]
+        by_district[district]["perimeter"] += border_length(
+            geoid, district, district_by_geoid, shapes, graph
+        )
+        by_district[district]["exterior"].extend(shapes[geoid]["exterior"])
+
+    # Calculate district diameters
+
+    implied_district_props: list[dict[str, float]] = []
+    for d in by_district[1:]:  # Remove the dummy district
+        _, _, r = rda.make_circle(d["exterior"])
+
+        area: float = d["area"]
+        perimeter: float = d["perimeter"]
+        diameter: float = 2 * r
+
+        implied_district_props.append(
+            {"area": area, "perimeter": perimeter, "diameter": diameter}
+        )
+
+    return implied_district_props
 
 
 def calc_population_deviation(
@@ -319,17 +400,27 @@ def calc_minority_metrics(
     return minority_metrics
 
 
-# @time_function
-def calc_compactness_metrics(district_shapes: list) -> dict[str, float]:
-    """Calculate compactness metrics."""
+def calc_compactness_metrics(
+    district_props: list[dict[str, float]]
+) -> dict[str, float]:
+    """Calculate compactness metrics using implied district props."""
 
-    all_results: dict[str, float] = rda.calc_compactness(district_shapes, kiwysi=False)
+    tot_reock: float = 0
+    tot_polsby: float = 0
+
+    for i, d in enumerate(district_props):
+        reock: float = rda.reock_formula(d["area"], d["diameter"] / 2)
+        polsby: float = rda.polsby_formula(d["area"], d["perimeter"])
+
+        tot_reock += reock
+        tot_polsby += polsby
+
+    avg_reock: float = tot_reock / len(district_props)
+    avg_polsby: float = tot_polsby / len(district_props)
 
     compactness_metrics: dict[str, float] = dict()
-    compactness_metrics["reock"] = all_results["avgReock"]
-    compactness_metrics["polsby_popper"] = all_results["avgPolsby"]
-    # Invert the KIWYSI rank (1-100, lower is better) to a score (0-100, higher is better)
-    # compactness_metrics["kiwysi"] = 100 - round(all_results["avgKIWYSI"]) + 1
+    compactness_metrics["reock"] = avg_reock
+    compactness_metrics["polsby_popper"] = avg_polsby
 
     return compactness_metrics
 
