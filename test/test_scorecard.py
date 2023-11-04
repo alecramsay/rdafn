@@ -9,7 +9,11 @@ import rdapy as rda
 from rdafn.readwrite import read_json
 from rdafn.constants import *
 from rdafn.load import *
-from rdafn.analyze import analyze_plan, index_counties_and_districts
+from rdafn.analyze import (
+    analyze_plan,
+    index_counties_and_districts,
+    calc_compactness_metrics,
+)
 from testutils import *
 
 
@@ -72,6 +76,25 @@ class TestScorecard:
                 assert approx_equal(
                     scorecard[metric], expected[metric], places=approx_floats[metric]
                 )
+
+    def test_compactness(self) -> None:
+        for xx in ["NC", "NJ"]:
+            profile_path = f"testdata/{xx}_root_profile.json"
+            profile: dict[str, Any] = read_json(profile_path)
+            implicit_district_props: list[dict[str, float]] = profile["shapes"]
+
+            scorecard_path: str = f"{testdata_dir}/{xx}_DRA_scorecard.json"
+            expected: dict[str, Any] = read_json(scorecard_path)
+
+            #
+
+            actual: dict[str, float] = calc_compactness_metrics(implicit_district_props)
+
+            # decimals_path: str = f"{testdata_dir}/expected_decimal_places.json"
+            # approx_floats: dict[str, int] = read_json(decimals_path)
+
+            for metric in ["reock", "polsby_popper"]:
+                assert approx_equal(actual[metric], expected[metric], places=4)
 
 
 ### END ###

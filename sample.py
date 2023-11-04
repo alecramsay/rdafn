@@ -20,11 +20,7 @@ ensemble: list[str] = [
     os.path.expanduser(f"{data_dir}/{xx}/") + x
     for x in [
         f"{xx}20C_baseline_100.csv",
-        # "NC20C_I000K01N14_vtd_assignments.csv",
-        # "NC20C_I001K01N14_vtd_assignments.csv",
-        # "NC20C_I002K01N14_vtd_assignments.csv",
-        # "NC20C_I003K01N14_vtd_assignments.csv",
-        # "NC20C_I004K01N14_vtd_assignments.csv",
+        # More plans here ...
     ]
 ]
 
@@ -39,13 +35,6 @@ D: int = DISTRICTS_BY_STATE[xx]["congress"]
 C: int = COUNTIES_BY_STATE[xx]
 
 #
-
-# assignments: list[dict[str, int]] = load_plan(ensemble[0])
-# district_props: list[dict[str, Any]] = aggregate_shapes_by_district(
-#     assignments, shapes, graph, D
-# )
-# compactness_metrics: dict[str, float] = calc_compactness_metrics(district_props)
-# pass
 
 sample: list[dict[str, int]] = load_plan(ensemble[0])
 county_to_index, district_to_index = index_counties_and_districts(sample)
