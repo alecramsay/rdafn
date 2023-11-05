@@ -20,7 +20,7 @@ Other perrenial gerrymanders:
 - MD: Ditto
 - WI: Ditto
 - TX: Ditto
-- VA: TODO
+- VA: Ditto
 - IL: TODO
 
 - FL: TODO - The official precinct shapes are whacked. Need to use DRA's here.
