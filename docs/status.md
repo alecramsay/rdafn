@@ -17,7 +17,7 @@ Other perrenial gerrymanders:
 - PA: Data & shapes extracted
 - MI: Ditto
 - OH: Ditto
-- MD: TODO
+- MD: Ditto
 - FL: TODO
 - WI: TODO
 - TX: TODO
