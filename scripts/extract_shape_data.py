@@ -110,6 +110,9 @@ def main() -> None:
         for neighbor in neighbors:
             if neighbor == OUT_OF_STATE:
                 continue
+            if neighbor not in vtd_shps:
+                print(f"WARNING: {neighbor} not in vtd_shps!")
+                continue
             neighbor_shp: Polygon | MultiPolygon = vtd_shps[neighbor]
             shared_edge = shp.intersection(neighbor_shp)
             shared_border: float = shared_edge.length
