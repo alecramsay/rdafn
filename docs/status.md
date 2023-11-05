@@ -5,7 +5,7 @@
 - NC: Ditto
 - SC: Ditto
 - NM: Ditto
-- AL: TODO
+- AL: Ditto
 - GA: TODO
 
 - PA: TODO
