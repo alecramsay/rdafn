@@ -12,6 +12,8 @@ For documentation, type:
 
 $ scripts/extract_data_and_shapes.py -h
 
+NOTE - Before running this script for a state, you have to create a config file for it.
+
 """
 
 import argparse
@@ -61,8 +63,7 @@ def main() -> None:
         "scripts/extract_census.py -s {xx}",
         "scripts/extract_elections.py -s {xx}",
         "scripts/join_data.py -s {xx}",
-        "scripts/extract_topo.py -s {xx}",
-        # "scripts/copy_shapes.py -s {xx}",
+        "scripts/extract_shape_data.py -s {xx}",
     ]
 
     for command in commands:
