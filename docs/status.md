@@ -1,15 +1,21 @@
 # Status by State
 
+Test state:
+
 - NJ: Data & shapes extracted
 
-- NC: Ditto
+States in the news:
+
+- NC: Data & shapes extracted
 - SC: Ditto
 - NM: Ditto
 - AL: Ditto
 - GA: Ditto
 
-- PA: TODO
-- MI: TODO
+Other perrenial gerrymanders:
+
+- PA: Data & shapes extracted
+- MI: Ditto
 - OH: TODO
 - MD: TODO
 - FL: TODO
