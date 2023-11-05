@@ -6,7 +6,7 @@
 - SC: Ditto
 - NM: Ditto
 - AL: Ditto
-- GA: TODO
+- GA: Ditto
 
 - PA: TODO
 - MI: TODO
