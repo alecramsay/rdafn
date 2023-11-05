@@ -39,10 +39,11 @@ Some things to note:
     to generate the the root maps in my [baseline](https://github.com/alecramsay/baseline) repo,
     as opposed to adjusted population data (if any), 
     we use the adjusted population data here to score ensemble plans.
+-   We simplify the precinct shapes (see `extract_shape_data.py`) to approximate the simplification that DRA does, so compactness measurements align.
 
 ## Notes
 
-With three exceptions noted next, `analyze_plan()` computes all the analytics that DRA does:
+With these three exceptions, `analyze_plan()` computes all the analytics that DRA does:
 
 -   For a variety of reasons, DRA's production TypeScript package 
     [dra-analytics](https://github.com/dra2020/dra-analytics) 
