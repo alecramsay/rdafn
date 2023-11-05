@@ -19,7 +19,7 @@ Other perrenial gerrymanders:
 - OH: Ditto
 - MD: Ditto
 - WI: Ditto
-- TX: TODO
+- TX: Ditto
 - VA: TODO
 - IL: TODO
 
