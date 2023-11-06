@@ -32,8 +32,6 @@ shapes: dict[str, Any] = load_shapes(xx)
 graph: dict[str, list[str]] = load_graph(xx)
 metadata: dict[str, Any] = load_metadata(xx)
 
-#
-
 # Analyze each plan in an ensemble
 
 for plan_path in ensemble:
