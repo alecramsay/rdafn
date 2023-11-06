@@ -31,14 +31,9 @@ ensemble: list[str] = [
 data: dict[str, dict[str, int]] = load_data(xx)
 shapes: dict[str, Any] = load_shapes(xx)
 graph: dict[str, list[str]] = load_graph(xx)
-
-D: int = DISTRICTS_BY_STATE[xx]["congress"]
-C: int = COUNTIES_BY_STATE[xx]
+metadata: dict[str, Any] = load_metadata(xx)
 
 #
-
-sample: list[dict[str, int]] = load_plan(ensemble[0])
-county_to_index, district_to_index = index_counties_and_districts(sample)
 
 # Analyze each plan in the ensemble
 # The looping and analytics call are boilerplate.
@@ -53,10 +48,7 @@ for plan_path in ensemble:
             data,
             shapes,
             graph,
-            D,
-            C,
-            county_to_index,
-            district_to_index,
+            metadata,
         )
 
         # Do something with the resulting "scorecard"

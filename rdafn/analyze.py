@@ -35,12 +35,14 @@ def analyze_plan(
     data: dict[str, dict[str, int]],
     shapes: dict[str, Any],
     graph: dict[str, list[str]],
-    n_districts: int,
-    n_counties: int,
-    county_to_index: dict[str, int],
-    district_to_index: dict[int, int],
+    metadata: dict[str, Any],
 ) -> dict[str, Any]:
     """Analyze a plan."""
+
+    n_districts: int = metadata["D"]
+    n_counties: int = metadata["C"]
+    county_to_index: dict[str, int] = metadata["county_to_index"]
+    district_to_index: dict[str, int] = metadata["district_to_index"]
 
     ### AGGREGATE DATA & SHAPES BY DISTRICT ###
 
@@ -123,39 +125,13 @@ def analyze_plan(
 ### HELPER FUNCTIONS ###
 
 
-def index_counties_and_districts(assignments: list[dict[str, int]]) -> tuple:
-    """Index counties and districts.
-
-    NOTE - This only needs to be done once per batch of plans being analyzed for a state.
-    """
-
-    counties: set[str] = set()
-    districts: set[int] = set()
-
-    for row in assignments:
-        precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
-        district: int = int(row["DISTRICT"] if "DISTRICT" in row else row["District"])
-
-        county: str = GeoID(precinct).county[2:]
-
-        counties.add(county)
-        districts.add(district)
-
-    county_to_index: dict[str, int] = {county: i for i, county in enumerate(counties)}
-    district_to_index: dict[int, int] = {
-        district: i for i, district in enumerate(districts)
-    }
-
-    return county_to_index, district_to_index
-
-
 def aggregate_data_by_district(
     assignments: list[dict[str, int]],
     data: dict[str, dict[str, int]],
     n_districts: int,
     n_counties: int,
     county_to_index: dict[str, int],
-    district_to_index: dict[int, int],
+    district_to_index: dict[str, int],
 ) -> dict[str, Any]:
     """Aggregate census & election data by district."""
 
@@ -209,7 +185,7 @@ def aggregate_data_by_district(
 
         county: str = GeoID(precinct).county[2:]
 
-        i: int = district_to_index[district]
+        i: int = district_to_index[str(district)]
         j: int = county_to_index[county]
 
         CxD[i][j] += pop

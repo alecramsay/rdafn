@@ -64,6 +64,7 @@ def main() -> None:
         "scripts/extract_elections.py -s {xx}",
         "scripts/join_data.py -s {xx}",
         "scripts/extract_shape_data.py -s {xx}",
+        # TODO - Add metadata extraction
     ]
 
     for command in commands:

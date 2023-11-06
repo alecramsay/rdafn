@@ -46,6 +46,28 @@ def load_graph(xx: str) -> dict[str, list[str]]:
     return graph
 
 
+def load_metadata(xx: str) -> dict[str, Any]:
+    """Load metadata for a state."""
+
+    metadata_path: str = path_to_file([data_dir, xx]) + file_name(
+        [xx, cycle, "metadata"], "_", "json"
+    )
+    metadata: dict[str, Any] = read_json(metadata_path)
+
+    return metadata
+
+
+def load_plan(plan_file: str) -> list[dict[str, int]]:
+    """Read a precinct-assignment file."""
+
+    assignments: list[dict[str, int]] = read_csv(plan_file, [str, int])
+
+    return assignments
+
+
+# NOT USED
+
+
 def load_topology(xx: str) -> dict[str, Any]:
     """Load the topology for a state."""
 
@@ -57,14 +79,6 @@ def load_topology(xx: str) -> dict[str, Any]:
     topo: dict[str, Any] = read_json(topo_path)
 
     return topo
-
-
-def load_plan(plan_file: str) -> list[dict[str, int]]:
-    """Read a precinct-assignment file."""
-
-    assignments: list[dict[str, int]] = read_csv(plan_file, [str, int])
-
-    return assignments
 
 
 ### END ###

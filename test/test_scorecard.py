@@ -11,7 +11,6 @@ from rdafn.constants import *
 from rdafn.load import *
 from rdafn.analyze import (
     analyze_plan,
-    index_counties_and_districts,
     calc_compactness_metrics,
 )
 from testutils import *
@@ -21,28 +20,15 @@ class TestScorecard:
     def test_scorecard(self) -> None:
         for xx in ["NC", "NJ"]:
             plan_path: str = f"{data_dir}/{xx}/{xx}20C_baseline_100.csv"
+            plan: list[dict[str, int]] = load_plan(plan_path)
 
             data: dict[str, dict[str, int]] = load_data(xx)
             shapes: dict[str, Any] = load_shapes(xx)
             graph: dict[str, list[str]] = load_graph(xx)
-
-            D: int = DISTRICTS_BY_STATE[xx]["congress"]
-            C: int = COUNTIES_BY_STATE[xx]
-
-            sample: list[dict[str, int]] = load_plan(plan_path)
-            county_to_index, district_to_index = index_counties_and_districts(sample)
-
-            assignments: list[dict[str, int]] = sample
+            metadata: dict[str, Any] = load_metadata(xx)
 
             scorecard: dict[str, Any] = analyze_plan(
-                assignments,
-                data,
-                shapes,
-                graph,
-                D,
-                C,
-                county_to_index,
-                district_to_index,
+                plan, data, shapes, graph, metadata
             )
 
             #
