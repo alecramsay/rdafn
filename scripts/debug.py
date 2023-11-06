@@ -13,13 +13,6 @@ $ scripts/debug.py -s NC
 import argparse
 from argparse import ArgumentParser, Namespace
 
-# from shapely.geometry import (
-#     shape,
-#     Polygon,
-#     MultiPolygon,
-# )
-
-# import rdapy as rda
 from rdafn import *
 
 

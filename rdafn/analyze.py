@@ -42,7 +42,7 @@ def analyze_plan(
     n_districts: int = metadata["D"]
     n_counties: int = metadata["C"]
     county_to_index: dict[str, int] = metadata["county_to_index"]
-    district_to_index: dict[str, int] = metadata["district_to_index"]
+    district_to_index: dict[int, int] = metadata["district_to_index"]
 
     ### AGGREGATE DATA & SHAPES BY DISTRICT ###
 
@@ -131,7 +131,7 @@ def aggregate_data_by_district(
     n_districts: int,
     n_counties: int,
     county_to_index: dict[str, int],
-    district_to_index: dict[str, int],
+    district_to_index: dict[int, int],
 ) -> dict[str, Any]:
     """Aggregate census & election data by district."""
 
@@ -185,7 +185,7 @@ def aggregate_data_by_district(
 
         county: str = GeoID(precinct).county[2:]
 
-        i: int = district_to_index[str(district)]
+        i: int = district_to_index[district]
         j: int = county_to_index[county]
 
         CxD[i][j] += pop

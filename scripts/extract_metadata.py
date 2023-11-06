@@ -79,12 +79,12 @@ def main() -> None:
     metadata["county_to_index"] = county_to_index
     metadata["district_to_index"] = district_to_index
 
-    ### WRITE THE METADATA TO A JSON FILE ###
+    ### PICKLE THE METADATA ###
 
     output_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "metadata"], "_", "json"
+        [xx, cycle, "metadata"], "_", "pickle"
     )
-    write_json(output_path, metadata)
+    write_pickle(output_path, metadata)
 
 
 if __name__ == "__main__":

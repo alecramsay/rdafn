@@ -50,9 +50,9 @@ def load_metadata(xx: str) -> dict[str, Any]:
     """Load metadata for a state."""
 
     metadata_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "metadata"], "_", "json"
+        [xx, cycle, "metadata"], "_", "pickle"
     )
-    metadata: dict[str, Any] = read_json(metadata_path)
+    metadata: dict[str, Any] = read_pickle(metadata_path)
 
     return metadata
 
