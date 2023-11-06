@@ -82,12 +82,18 @@ def main() -> None:
 
     ### LOAD THE SHAPES ###
 
+    geoid_field: str = "GEOID20"
     vtd_path: str = path_to_file([shapes_dir, xx]) + file_name(
         ["tl_2020", fips, "vtd20"], "_"
     )
+
+    if xx == "FL":  # Use DRA's corrected precincts for Florida
+        vtd_path = path_to_file([shapes_dir, xx]) + "tabblock.vtd.cleaned"
+        geoid_field = "id"
+
     vtd_shps: dict
     other: Optional[dict[str, Any]]
-    vtd_shps, other = read_shapes(vtd_path, "GEOID20")
+    vtd_shps, other = read_shapes(vtd_path, geoid_field)
 
     ### ABSTRACT THE SHAPES ###
 

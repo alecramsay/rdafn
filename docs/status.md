@@ -23,4 +23,5 @@ Other perrenial gerrymanders:
 - VA: Ditto
 - IL: Ditto
 
-- FL: TODO - The official precinct shapes are whacked. Need to use DRA's here.
+- FL: Ditto - Note, these use DRA's corrected precinct shapes (GeoJSON), with intersections
+  removed, and converted to a shapefile, before simplifying them.
