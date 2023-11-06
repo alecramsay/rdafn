@@ -20,7 +20,7 @@ class TestScorecard:
     def test_scorecard(self) -> None:
         for xx in ["NC", "NJ"]:
             plan_path: str = f"{data_dir}/{xx}/{xx}20C_baseline_100.csv"
-            plan: list[dict[str, int]] = load_plan(plan_path)
+            plan: list[dict[str, str | int]] = load_plan(plan_path)
 
             data: dict[str, dict[str, int]] = load_data(xx)
             shapes: dict[str, Any] = load_shapes(xx)

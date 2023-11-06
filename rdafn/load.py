@@ -57,10 +57,10 @@ def load_metadata(xx: str) -> dict[str, Any]:
     return metadata
 
 
-def load_plan(plan_file: str) -> list[dict[str, int]]:
+def load_plan(plan_file: str) -> list[dict[str, str | int]]:
     """Read a precinct-assignment file."""
 
-    assignments: list[dict[str, int]] = read_csv(plan_file, [str, int])
+    assignments: list[dict[str, str | int]] = read_csv(plan_file, [str, int])
 
     return assignments
 

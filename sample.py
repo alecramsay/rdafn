@@ -25,8 +25,7 @@ ensemble: list[str] = [
     ]
 ]
 
-# Load the state
-# This is boilerplate: nothing needs to change here.
+# Load the state -- This is boilerplate: nothing needs to change.
 
 data: dict[str, dict[str, int]] = load_data(xx)
 shapes: dict[str, Any] = load_shapes(xx)
@@ -35,13 +34,15 @@ metadata: dict[str, Any] = load_metadata(xx)
 
 #
 
-# Analyze each plan in the ensemble
-# The looping and analytics call are boilerplate.
-# You just need to do something with the resulting "scorecard".
+# Analyze each plan in an ensemble
 
 for plan_path in ensemble:
     try:
-        assignments: list[dict[str, int]] = load_plan(plan_path)
+        # Get a plan from the ensemble
+
+        assignments: list[dict[str, str | int]] = load_plan(plan_path)
+
+        # Score it
 
         scorecard: dict[str, Any] = analyze_plan(
             assignments,

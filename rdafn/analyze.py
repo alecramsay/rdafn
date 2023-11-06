@@ -31,7 +31,7 @@ dem_votes_field: str = election_fields[2]
 
 @time_function
 def analyze_plan(
-    assignments: list[dict[str, int]],
+    assignments: list[dict[str, str | int]],
     data: dict[str, dict[str, int]],
     shapes: dict[str, Any],
     graph: dict[str, list[str]],
@@ -126,7 +126,7 @@ def analyze_plan(
 
 
 def aggregate_data_by_district(
-    assignments: list[dict[str, int]],
+    assignments: list[dict[str, str | int]],
     data: dict[str, dict[str, int]],
     n_districts: int,
     n_counties: int,
@@ -227,7 +227,7 @@ def border_length(
 
 
 def aggregate_shapes_by_district(
-    assignments: list[dict[str, int]],
+    assignments: list[dict[str, str | int]],
     shapes: dict[str, Any],
     graph: dict[str, list[str]],
     n_districts: int,
