@@ -28,7 +28,7 @@ The data we use to score plans comes from the following sources:
 -   The shapes are copies of tl_2020_FF_vtd20.zip from [the Census Bureau](https://www2.census.gov/geo/tiger/TIGER2020PL/LAYER), 
     where FF is the state FIPS code, e.g., 37 for North Carolina.
 
-Some things to note:
+Some things to be aware of:
 
 -   We've already created the precinct contiguity graphs as part of finding root map candidates
     in my [baseline](https://github.com/alecramsay/baseline) GitHub repo,
@@ -39,6 +39,8 @@ Some things to note:
     to generate the the root maps in my [baseline](https://github.com/alecramsay/baseline) repo,
     as opposed to adjusted population data (if any), 
     we use the adjusted population data here to score ensemble plans.
+-   For Florida, the official VTDs from the Census Bureau are bad. 
+    We use DRA's corrected precinct shapes (GeoJSON), remove the intersections, and then convert it to a shapefile.
 -   We simplify the precinct shapes (see `extract_shape_data.py`) to approximate the simplification that DRA does, so compactness measurements align.
 
 ## Notes
