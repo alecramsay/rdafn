@@ -95,7 +95,7 @@ def main() -> None:
             print(scorecard)
 
         except Exception as e:
-            print(f"Error analyzing {plan_path}: {e}")
+            print(f"Error analyzing plan: {e}")
 
 
 if __name__ == "__main__":
