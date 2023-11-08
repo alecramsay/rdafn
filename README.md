@@ -52,7 +52,7 @@ With these three exceptions, `analyze_plan()` computes all the analytics that DR
 -   For a variety of reasons, DRA's production TypeScript package 
     [dra-analytics](https://github.com/dra2020/dra-analytics) 
     does not calculate a few minor things that show up in the UI. 
-    The Python port [rdafn](https://github.com/dra2020/rdapy) does not either.
+    The Python port [rdapy](https://github.com/dra2020/rdapy) does not either.
     This repo uses the latter, so those few things also aren't in the "scorecard" output.
 -   To keep the results simple, district-level results are suppressed. The scorecard is a simple flat
     dictionary of metric key/value pairs.
