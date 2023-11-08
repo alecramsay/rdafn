@@ -11,9 +11,11 @@ $ pip install -r requirements.txt
 $ ./sample.py
 ```
 
+Also, make sure the `rdafn` directory is on your `PYTHONPATH`.
+
 ## Usage
 
-See `sample.py` for an example of how to use the library.
+See `scripts/analyze_ensemble.py` or `sample.py` for examples of how to use this code.
 See sample results from `analyze_plan()` in `sample_NC_scorecard.txt`.
 
 ## Data
