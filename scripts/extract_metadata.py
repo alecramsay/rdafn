@@ -12,6 +12,8 @@ For documentation, type:
 
 $ scripts/extract_metadata.py -h
 
+TODO - DELETE
+
 """
 
 import argparse

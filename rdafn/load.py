@@ -53,12 +53,49 @@ def load_graph(xx: str) -> dict[str, list[str]]:
 def load_metadata(xx: str) -> dict[str, Any]:
     """Load scoring-specific metadata for a state."""
 
-    metadata_path: str = rdd.path_to_file([local_data_dir, xx]) + rdd.file_name(
-        [xx, rdd.cycle, "metadata"], "_", "pickle"
+    ### INFER COUNTY FIPS CODES ###
+
+    census_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+        [xx, rdd.cycle, "data"], "_", "csv"
     )
-    metadata: dict[str, Any] = rdd.read_pickle(metadata_path)
+    data: list = rdd.read_csv(census_path, [str] + [int] * 9)
+
+    counties: set[str] = set()
+    for row in data:
+        precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
+        county: str = rdd.GeoID(precinct).county[2:]
+        counties.add(county)
+
+    ### GATHER METADATA ###
+
+    C: int = rdd.COUNTIES_BY_STATE[xx]
+    D: int = rdd.DISTRICTS_BY_STATE[xx]["congress"]
+
+    county_to_index: dict[str, int] = {county: i for i, county in enumerate(counties)}
+
+    district_to_index: dict[int, int] = {
+        district: i for i, district in enumerate(range(1, D + 1))
+    }  # NOTE - This is getting persisted as JSON, so districts will be strings
+
+    metadata: dict[str, Any] = dict()
+    metadata["C"] = C
+    metadata["D"] = D
+    metadata["county_to_index"] = county_to_index
+    metadata["district_to_index"] = district_to_index
 
     return metadata
+
+
+# TODO - DELETE
+# def load_metadata(xx: str) -> dict[str, Any]:
+#     """Load scoring-specific metadata for a state."""
+
+#     metadata_path: str = rdd.path_to_file([local_data_dir, xx]) + rdd.file_name(
+#         [xx, rdd.cycle, "metadata"], "_", "pickle"
+#     )
+#     metadata: dict[str, Any] = rdd.read_pickle(metadata_path)
+
+#     return metadata
 
 
 def load_plan(plan_file: str) -> list[dict[str, str | int]]:
