@@ -10,15 +10,21 @@ $ ./sample.py
 """
 
 import os
+from typing import Any
 
+import rdadata as rdd
 from rdafn import *
 
 # Specify a state and an ensemble of plans
 
 xx: str = "NJ"
 
+data_project: str = "../rdadata"
+shared_data_dir: str = f"{data_project}/data/"
+local_data_dir: str = "data"
+
 ensemble: list[str] = [
-    os.path.expanduser(f"{data_dir}/{xx}/") + x
+    os.path.expanduser(f"{local_data_dir}/{xx}/") + x
     for x in [
         f"{xx}20C_baseline_100.csv",
         # More plans here ...

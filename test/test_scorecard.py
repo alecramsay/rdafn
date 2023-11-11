@@ -7,9 +7,6 @@ TEST SAMPLE SCORECARDS
 import rdadata as rdd
 import rdapy as rda
 
-# TODO
-# from rdafn.readwrite import read_json
-# from rdafn.constants import *
 from rdafn.load import *
 from rdafn.analyze import (
     analyze_plan,

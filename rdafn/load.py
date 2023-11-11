@@ -7,34 +7,37 @@ LOAD HELPERS
 from typing import Any
 import rdadata as rdd
 
-# TODO
-# from .constants import *
-# from .readwrite import *
+data_project: str = "../rdadata"
+shared_data_dir: str = f"{data_project}/data/"
+local_data_dir: str = "data"
 
 
 def load_data(xx: str) -> dict[str, dict[str, int]]:
-    """Load preprocessed census & election data."""
+    """Load preprocessed census & election data and index it by GEOID."""
 
-    pickle_path: str = rdd.path_to_file([rdd.data_dir, xx]) + rdd.file_name(
-        [xx, rdd.cycle, "data"], "_", "pickle"
+    data_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+        [xx, rdd.cycle, "data"], "_", "csv"
     )
+    data: list[dict] = rdd.read_csv(data_path, [str] + [int] * 13)
 
-    data: dict[str, dict[str, int]] = rdd.read_pickle(pickle_path)
+    indexed: dict[str, dict[str, int]] = dict()
+    for row in data:
+        geoid: str = row[rdd.geoid_field]
+        indexed[geoid] = row
 
-    return data
+    return indexed
 
 
 def load_shapes(xx: str, simplified: bool = True) -> dict[str, dict[str, Any]]:
-    """Load preprocessed shape data."""
+    """Load preprocessed shape data and index it by GEOID."""
 
-    pickle_name: str = (
-        f"{xx}_{rdd.cycle}_shapes_simplified.pickle"
+    shapes_name: str = (
+        f"{xx}_{rdd.cycle}_shapes_simplified.json"
         if simplified
-        else f"{xx}_{rdd.cycle}_shapes.pickle"
+        else f"{xx}_{rdd.cycle}_shapes.json"
     )
-    pickle_path: str = rdd.path_to_file([rdd.data_dir, xx]) + pickle_name
-
-    shapes: dict[str, dict[str, Any]] = rdd.read_pickle(pickle_path)
+    shapes_path: str = rdd.path_to_file([shared_data_dir, xx]) + shapes_name
+    shapes: dict[str, dict[str, Any]] = rdd.read_json(shapes_path)
 
     return shapes
 
@@ -42,7 +45,7 @@ def load_shapes(xx: str, simplified: bool = True) -> dict[str, dict[str, Any]]:
 def load_graph(xx: str) -> dict[str, list[str]]:
     """Load the graph for a state."""
 
-    graph_path: str = rdd.path_to_file([rdd.data_dir, xx]) + rdd.file_name(
+    graph_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
         [xx, rdd.cycle, "graph"], "_", "json"
     )
     graph: dict[str, list[str]] = rdd.read_json(graph_path)
@@ -51,9 +54,9 @@ def load_graph(xx: str) -> dict[str, list[str]]:
 
 
 def load_metadata(xx: str) -> dict[str, Any]:
-    """Load metadata for a state."""
+    """Load scoring-specific metadata for a state."""
 
-    metadata_path: str = rdd.path_to_file([rdd.data_dir, xx]) + rdd.file_name(
+    metadata_path: str = rdd.path_to_file([local_data_dir, xx]) + rdd.file_name(
         [xx, rdd.cycle, "metadata"], "_", "pickle"
     )
     metadata: dict[str, Any] = rdd.read_pickle(metadata_path)
@@ -67,22 +70,6 @@ def load_plan(plan_file: str) -> list[dict[str, str | int]]:
     assignments: list[dict[str, str | int]] = rdd.read_csv(plan_file, [str, int])
 
     return assignments
-
-
-# NOT USED
-
-
-def load_topology(xx: str) -> dict[str, Any]:
-    """Load the topology for a state."""
-
-    topo_file: str = f"{xx}_vtd_simple_topo.json"
-    # topo_file: str = f"{xx}_vtd_topo.json"
-    # topo_file: str = f"{xx}_vtd_quantized_topo.json"
-    topo_path: str = rdd.path_to_file([rdd.data_dir, xx]) + topo_file
-
-    topo: dict[str, Any] = rdd.read_json(topo_path)
-
-    return topo
 
 
 ### END ###

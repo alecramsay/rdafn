@@ -10,10 +10,6 @@ from typing import Any
 import rdapy as rda
 import rdadata as rdd
 
-# TODO
-# from .constants import *
-# from .utils import *
-
 ### FIELD NAMES ###
 
 total_pop_field: str = rdd.census_fields[0]
@@ -32,7 +28,7 @@ dem_votes_field: str = rdd.election_fields[2]
 # oth_votes_field: str = rdd.election_fields[3]
 
 
-# @time_function
+# @rdd.time_function
 def analyze_plan(
     assignments: list[dict[str, str | int]],
     data: dict[str, dict[str, int]],
