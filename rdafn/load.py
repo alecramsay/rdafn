@@ -20,10 +20,7 @@ def load_data(xx: str) -> dict[str, dict[str, int]]:
     )
     data: list[dict] = rdd.read_csv(data_path, [str] + [int] * 13)
 
-    indexed: dict[str, dict[str, int]] = dict()
-    for row in data:
-        geoid: str = row[rdd.geoid_field]
-        indexed[geoid] = row
+    indexed: dict[str, dict[str, int]] = rdd.index_data(data)
 
     return indexed
 
