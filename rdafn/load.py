@@ -55,10 +55,10 @@ def load_metadata(xx: str) -> dict[str, Any]:
 
     ### INFER COUNTY FIPS CODES ###
 
-    census_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+    data_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
         [xx, rdd.cycle, "data"], "_", "csv"
     )
-    data: list = rdd.read_csv(census_path, [str] + [int] * 9)
+    data: list = rdd.read_csv(data_path, [str] + [int] * 13)
 
     counties: set[str] = set()
     for row in data:
@@ -84,18 +84,6 @@ def load_metadata(xx: str) -> dict[str, Any]:
     metadata["district_to_index"] = district_to_index
 
     return metadata
-
-
-# TODO - DELETE
-# def load_metadata(xx: str) -> dict[str, Any]:
-#     """Load scoring-specific metadata for a state."""
-
-#     metadata_path: str = rdd.path_to_file([local_data_dir, xx]) + rdd.file_name(
-#         [xx, rdd.cycle, "metadata"], "_", "pickle"
-#     )
-#     metadata: dict[str, Any] = rdd.read_pickle(metadata_path)
-
-#     return metadata
 
 
 def load_plan(plan_file: str) -> list[dict[str, str | int]]:

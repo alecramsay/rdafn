@@ -21,10 +21,10 @@ xx: str = "NJ"
 
 data_project: str = "../rdadata"
 shared_data_dir: str = f"{data_project}/data/"
-local_data_dir: str = "data"
+sample_dir: str = "sample"
 
 ensemble: list[str] = [
-    os.path.expanduser(f"{local_data_dir}/{xx}/") + x
+    os.path.expanduser(f"{sample_dir}/") + x
     for x in [
         f"{xx}20C_baseline_100.csv",
         # More plans here ...
