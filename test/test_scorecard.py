@@ -18,13 +18,28 @@ from testutils import *
 class TestScorecard:
     def test_scorecard(self) -> None:
         for xx in ["NC", "NJ"]:
-            plan_path: str = f"{rdd.data_dir}/{xx}/{xx}20C_baseline_100.csv"
+            plan_path: str = f"sample/{xx}20C_baseline_100.csv"
             plan: list[dict[str, str | int]] = load_plan(plan_path)
 
-            data: dict[str, dict[str, int]] = load_data(xx)
-            shapes: dict[str, Any] = load_shapes(xx)
-            graph: dict[str, list[str]] = load_graph(xx)
-            metadata: dict[str, Any] = load_metadata(xx)
+            data_project: str = "../rdadata"
+            shared_data_dir: str = f"{data_project}/data/"
+
+            data_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+                [xx, rdd.cycle, "data"], "_", "csv"
+            )
+            shapes_name: str = f"{xx}_{rdd.cycle}_shapes_simplified.json"
+            shapes_path: str = rdd.path_to_file([shared_data_dir, xx]) + shapes_name
+
+            graph_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+                [xx, rdd.cycle, "graph"], "_", "json"
+            )
+
+            ### BOILERPLATE - DON'T CHANGE THIS ###
+
+            data: dict[str, dict[str, int]] = load_data(data_path)
+            shapes: dict[str, Any] = load_shapes(shapes_path)
+            graph: dict[str, list[str]] = load_graph(graph_path)
+            metadata: dict[str, Any] = load_metadata(xx, data_path)
 
             scorecard: dict[str, Any] = analyze_plan(
                 plan, data, shapes, graph, metadata

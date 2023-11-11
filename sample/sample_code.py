@@ -19,9 +19,23 @@ from rdafn import *
 
 xx: str = "NJ"
 
+### PATHS TO FILES ###
+
 data_project: str = "../rdadata"
 shared_data_dir: str = f"{data_project}/data/"
 sample_dir: str = "sample"
+
+data_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+    [xx, rdd.cycle, "data"], "_", "csv"
+)
+shapes_name: str = f"{xx}_{rdd.cycle}_shapes_simplified.json"
+shapes_path: str = rdd.path_to_file([shared_data_dir, xx]) + shapes_name
+
+graph_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+    [xx, rdd.cycle, "graph"], "_", "json"
+)
+
+### AN ENSEMBLE OF PLAN CSV FILES ON DISK ###
 
 ensemble: list[str] = [
     os.path.expanduser(f"{sample_dir}/") + x
@@ -31,22 +45,18 @@ ensemble: list[str] = [
     ]
 ]
 
-# Load the state -- This is boilerplate: nothing needs to change.
+### BOILERPLATE - DON'T CHANGE THIS ###
 
-data: dict[str, dict[str, int]] = load_data(xx)
-shapes: dict[str, Any] = load_shapes(xx)
-graph: dict[str, list[str]] = load_graph(xx)
-metadata: dict[str, Any] = load_metadata(xx)
+data: dict[str, dict[str, int]] = load_data(data_path)
+shapes: dict[str, Any] = load_shapes(shapes_path)
+graph: dict[str, list[str]] = load_graph(graph_path)
+metadata: dict[str, Any] = load_metadata(xx, data_path)
 
-# Analyze each plan in an ensemble
+### ANALYZE EACH PLAN IN THE ENSEMBLE ###
 
 for plan_path in ensemble:
     try:
-        # Get a plan from the ensemble
-
         assignments: list[dict[str, str | int]] = load_plan(plan_path)
-
-        # Score it
 
         scorecard: dict[str, Any] = analyze_plan(
             assignments,
@@ -56,7 +66,7 @@ for plan_path in ensemble:
             metadata,
         )
 
-        # Do something with the resulting "scorecard"
+        # TODO - Do something with the resulting "scorecard"
 
         print()
         print(f"Scorecard:")
