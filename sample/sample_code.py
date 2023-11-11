@@ -5,7 +5,7 @@ SAMPLE CODE
 
 To run:
 
-$ ./sample.py
+$ sample/sample_code.py
 
 """
 

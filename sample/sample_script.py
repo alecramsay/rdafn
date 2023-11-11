@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
 """
-
-SAMPLE SCRIPT FOR ANALYZING AN ENSEMBLE OF PLANS
+SAMPLE COMMAND-LINE SCRIPT FOR ANALYZING AN ENSEMBLE OF PLANS
 
 To run:
 
-$ scripts/analyze_ensemble.py -s NJ
+$ sample/sample_script.py -s NJ
 
 For documentation, type:
 
-$ scripts/analyze_ensemble.py -h
+$ sample/sample_script.py -h
 
 """
 
@@ -51,6 +50,14 @@ def parse_args() -> Namespace:
     return args
 
 
+### DIRECTORIES ON DISK ###
+
+sample_dir: str = "sample"
+
+
+### PLAN GENERATOR ###
+
+
 def plans_from_ensemble(
     xx: str, ensemble_path: str
 ) -> Generator[list[dict[str, str | int]], None, None]:
@@ -58,9 +65,7 @@ def plans_from_ensemble(
 
     # Replace this with code that reads an ensemble file and returns plans one at a time
     ensemble: list[list[dict[str, str | int]]] = [
-        load_plan(
-            os.path.expanduser(f"{rdd.data_dir}/{xx}/") + f"{xx}20C_baseline_100.csv"
-        )
+        load_plan(os.path.expanduser(f"{sample_dir}/") + f"{xx}20C_baseline_100.csv")
     ]
 
     for plan in ensemble:
