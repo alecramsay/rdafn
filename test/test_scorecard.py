@@ -4,10 +4,12 @@
 TEST SAMPLE SCORECARDS
 """
 
+import rdadata as rdd
 import rdapy as rda
 
-from rdafn.readwrite import read_json
-from rdafn.constants import *
+# TODO
+# from rdafn.readwrite import read_json
+# from rdafn.constants import *
 from rdafn.load import *
 from rdafn.analyze import (
     analyze_plan,
@@ -19,7 +21,7 @@ from testutils import *
 class TestScorecard:
     def test_scorecard(self) -> None:
         for xx in ["NC", "NJ"]:
-            plan_path: str = f"{data_dir}/{xx}/{xx}20C_baseline_100.csv"
+            plan_path: str = f"{rdd.data_dir}/{xx}/{xx}20C_baseline_100.csv"
             plan: list[dict[str, str | int]] = load_plan(plan_path)
 
             data: dict[str, dict[str, int]] = load_data(xx)
@@ -33,10 +35,10 @@ class TestScorecard:
 
             #
 
-            expected_path: str = f"{testdata_dir}/{xx}_DRA_scorecard.json"
+            expected_path: str = f"{rdd.testdata_dir}/{xx}_DRA_scorecard.json"
             expected: dict[str, Any] = read_json(expected_path)
 
-            decimals_path: str = f"{testdata_dir}/expected_decimal_places.json"
+            decimals_path: str = f"{rdd.testdata_dir}/expected_decimal_places.json"
             approx_floats: dict[str, int] = read_json(decimals_path)
             exact_ints: list[str] = [
                 "pr_seats",
@@ -69,7 +71,7 @@ class TestScorecard:
             profile: dict[str, Any] = read_json(profile_path)
             implicit_district_props: list[dict[str, float]] = profile["shapes"]
 
-            scorecard_path: str = f"{testdata_dir}/{xx}_DRA_scorecard.json"
+            scorecard_path: str = f"{rdd.testdata_dir}/{xx}_DRA_scorecard.json"
             expected: dict[str, Any] = read_json(scorecard_path)
 
             #

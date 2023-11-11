@@ -5,28 +5,31 @@ ANALYZE A PLAN
 """
 
 from collections import defaultdict
+from typing import Any
 
 import rdapy as rda
+import rdadata as rdd
 
-from .constants import *
-from .utils import *
+# TODO
+# from .constants import *
+# from .utils import *
 
 ### FIELD NAMES ###
 
-total_pop_field: str = census_fields[0]
-total_vap_field: str = census_fields[1]
-# white_vap_field: str = census_fields[2]
-# hispanic_vap_field: str = census_fields[3]
-# black_vap_field: str = census_fields[4]
-# native_vap_field: str = census_fields[5]
-# asian_vap_field: str = census_fields[6]
-# pacific_vap_field: str = census_fields[7]
-# minority_vap_field: str = census_fields[8]
+total_pop_field: str = rdd.census_fields[0]
+total_vap_field: str = rdd.census_fields[1]
+# white_vap_field: str = rdd.census_fields[2]
+# hispanic_vap_field: str = rdd.census_fields[3]
+# black_vap_field: str = rdd.census_fields[4]
+# native_vap_field: str = rdd.census_fields[5]
+# asian_vap_field: str = rdd.census_fields[6]
+# pacific_vap_field: str = rdd.census_fields[7]
+# minority_vap_field: str = rdd.census_fields[8]
 
-# total_votes_field: str = election_fields[0]
-rep_votes_field: str = election_fields[1]
-dem_votes_field: str = election_fields[2]
-# oth_votes_field: str = election_fields[3]
+# total_votes_field: str = rdd.election_fields[0]
+rep_votes_field: str = rdd.election_fields[1]
+dem_votes_field: str = rdd.election_fields[2]
+# oth_votes_field: str = rdd.election_fields[3]
 
 
 # @time_function
@@ -177,13 +180,13 @@ def aggregate_data_by_district(
 
         # For minority opportunity metrics
 
-        for demo in census_fields[1:]:  # Everything except total population
+        for demo in rdd.census_fields[1:]:  # Everything except total population
             demos_totals[demo] += data[precinct][demo]
             demos_by_district[district][demo] += data[precinct][demo]
 
         # For county-district splitting
 
-        county: str = GeoID(precinct).county[2:]
+        county: str = rdd.GeoID(precinct).county[2:]
 
         i: int = district_to_index[district]
         j: int = county_to_index[county]
@@ -217,8 +220,8 @@ def border_length(
     arc_length: float = 0.0
 
     for n in graph[geoid]:
-        if n == OUT_OF_STATE:
-            if OUT_OF_STATE in shapes[geoid]["arcs"]:
+        if n == rdd.OUT_OF_STATE:
+            if rdd.OUT_OF_STATE in shapes[geoid]["arcs"]:
                 arc_length += shapes[geoid]["arcs"][n]
         elif district_by_geoid[n] != district:
             arc_length += shapes[geoid]["arcs"][n]
@@ -369,7 +372,7 @@ def calc_minority_metrics(
     """Calculate minority metrics."""
 
     statewide_demos: dict[str, float] = dict()
-    for demo in census_fields[2:]:  # Skip total population & total VAP
+    for demo in rdd.census_fields[2:]:  # Skip total population & total VAP
         simple_demo: str = demo.split("_")[0].lower()
         statewide_demos[simple_demo] = (
             demos_totals[demo] / demos_totals[total_vap_field]
@@ -378,7 +381,7 @@ def calc_minority_metrics(
     by_district: list[dict[str, float]] = list()
     for i in range(1, n_districts + 1):
         district_demos: dict[str, float] = dict()
-        for demo in census_fields[2:]:  # Skip total population & total VAP
+        for demo in rdd.census_fields[2:]:  # Skip total population & total VAP
             simple_demo: str = demo.split("_")[0].lower()
             district_demos[simple_demo] = (
                 demos_by_district[i][demo] / demos_by_district[i][total_vap_field]

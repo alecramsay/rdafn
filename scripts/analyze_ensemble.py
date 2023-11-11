@@ -6,17 +6,21 @@ SAMPLE SCRIPT FOR ANALYZING AN ENSEMBLE OF PLANS
 
 To run:
 
-$ scripts/analyze_plan.py -s NJ
+$ scripts/analyze_ensemble.py -s NJ
 
 For documentation, type:
 
-$ scripts/analyze_plan.py -h
+$ scripts/analyze_ensemble.py -h
 
 """
 
 import argparse
 from argparse import ArgumentParser, Namespace
 
+import os
+from typing import Any, Generator
+
+import rdadata as rdd
 from rdafn import *
 
 
@@ -54,7 +58,9 @@ def plans_from_ensemble(
 
     # Replace this with code that reads an ensemble file and returns plans one at a time
     ensemble: list[list[dict[str, str | int]]] = [
-        load_plan(os.path.expanduser(f"{data_dir}/{xx}/") + f"{xx}20C_baseline_100.csv")
+        load_plan(
+            os.path.expanduser(f"{rdd.data_dir}/{xx}/") + f"{xx}20C_baseline_100.csv"
+        )
     ]
 
     for plan in ensemble:
