@@ -12,7 +12,7 @@ States in the news:
 - AL: Ditto
 - GA: Ditto
 
-Other perrenial gerrymanders:
+Other perennial gerrymanders:
 
 - PA: Data & shapes extracted
 - MI: Ditto

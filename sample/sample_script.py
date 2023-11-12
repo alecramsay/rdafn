@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 
 """
-
-SAMPLE SCRIPT FOR ANALYZING AN ENSEMBLE OF PLANS
+SAMPLE COMMAND-LINE SCRIPT FOR ANALYZING AN ENSEMBLE OF PLANS
 
 To run:
 
-$ scripts/analyze_plan.py -s NJ
+$ sample/sample_script.py -s NJ
 
 For documentation, type:
 
-$ scripts/analyze_plan.py -h
+$ sample/sample_script.py -h
 
 """
 
 import argparse
 from argparse import ArgumentParser, Namespace
 
+import os
+from typing import Any, Generator
+
+import rdadata as rdd
 from rdafn import *
 
 
@@ -47,14 +50,17 @@ def parse_args() -> Namespace:
     return args
 
 
+### PLAN GENERATOR ###
+
+
 def plans_from_ensemble(
     xx: str, ensemble_path: str
 ) -> Generator[list[dict[str, str | int]], None, None]:
     """Return plans (assignments) one at a time from an ensemble file"""
 
-    # Replace this with code that reads an ensemble file and returns plans one at a time
+    # TODO - Replace this with code that reads an ensemble file and returns plans one at a time
     ensemble: list[list[dict[str, str | int]]] = [
-        load_plan(os.path.expanduser(f"{data_dir}/{xx}/") + f"{xx}20C_baseline_100.csv")
+        load_plan(os.path.expanduser("sample/") + f"{xx}20C_baseline_100.csv")
     ]
 
     for plan in ensemble:
@@ -71,14 +77,29 @@ def main() -> None:
 
     verbose: bool = args.verbose
 
-    # Load the state -- This is boilerplate: nothing needs to change.
+    ### PATHS TO FILES ###
 
-    data: dict[str, dict[str, int]] = load_data(xx)
-    shapes: dict[str, Any] = load_shapes(xx)
-    graph: dict[str, list[str]] = load_graph(xx)
-    metadata: dict[str, Any] = load_metadata(xx)
+    data_project: str = "../rdadata"
+    shared_data_dir: str = f"{data_project}/data/"
 
-    # Analyze each plan in an ensemble
+    data_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+        [xx, rdd.cycle, "data"], "_", "csv"
+    )
+    shapes_name: str = f"{xx}_{rdd.cycle}_shapes_simplified.json"
+    shapes_path: str = rdd.path_to_file([shared_data_dir, xx]) + shapes_name
+
+    graph_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
+        [xx, rdd.cycle, "graph"], "_", "json"
+    )
+
+    ### BOILERPLATE - DON'T CHANGE THIS ###
+
+    data: dict[str, dict[str, int]] = load_data(data_path)
+    shapes: dict[str, Any] = load_shapes(shapes_path)
+    graph: dict[str, list[str]] = load_graph(graph_path)
+    metadata: dict[str, Any] = load_metadata(xx, data_path)
+
+    ### ANALYZE EACH PLAN IN THE ENSEMBLE ###
 
     for assignments in plans_from_ensemble(xx, ensemble_path):
         try:

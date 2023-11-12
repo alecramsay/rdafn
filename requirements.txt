@@ -1,4 +1,5 @@
 fiona==1.9.5
 pytest==7.4.2
+rdadata==1.0.0
 rdapy==1.4.0
-Shapely==2.0.2
+shapely==2.0.2

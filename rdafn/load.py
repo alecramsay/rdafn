@@ -4,55 +4,64 @@
 LOAD HELPERS
 """
 
-from .constants import *
-from .readwrite import *
+from typing import Any
+import rdadata as rdd
 
 
-def load_data(xx: str) -> dict[str, dict[str, int]]:
-    """Load preprocessed census & election data."""
+def load_data(data_path: str) -> dict[str, dict[str, int]]:
+    """Load preprocessed census & election data and index it by GEOID."""
 
-    pickle_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "data"], "_", "pickle"
-    )
+    data: list[dict] = rdd.read_csv(data_path, [str] + [int] * 13)
+    indexed: dict[str, dict[str, int]] = rdd.index_data(data)
 
-    data: dict[str, dict[str, int]] = read_pickle(pickle_path)
-
-    return data
+    return indexed
 
 
-def load_shapes(xx: str, simplified: bool = True) -> dict[str, dict[str, Any]]:
-    """Load preprocessed shape data."""
+def load_shapes(shapes_path: str) -> dict[str, dict[str, Any]]:
+    """Load preprocessed shape data and index it by GEOID."""
 
-    pickle_name: str = (
-        f"{xx}_{cycle}_shapes_simplified.pickle"
-        if simplified
-        else f"{xx}_{cycle}_shapes.pickle"
-    )
-    pickle_path: str = path_to_file([data_dir, xx]) + pickle_name
-
-    shapes: dict[str, dict[str, Any]] = read_pickle(pickle_path)
+    shapes: dict[str, dict[str, Any]] = rdd.read_json(shapes_path)
 
     return shapes
 
 
-def load_graph(xx: str) -> dict[str, list[str]]:
+def load_graph(graph_path: str) -> dict[str, list[str]]:
     """Load the graph for a state."""
 
-    graph_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "graph"], "_", "json"
-    )
-    graph: dict[str, list[str]] = read_json(graph_path)
+    graph: dict[str, list[str]] = rdd.read_json(graph_path)
 
     return graph
 
 
-def load_metadata(xx: str) -> dict[str, Any]:
-    """Load metadata for a state."""
+def load_metadata(xx: str, data_path: str) -> dict[str, Any]:
+    """Load scoring-specific metadata for a state."""
 
-    metadata_path: str = path_to_file([data_dir, xx]) + file_name(
-        [xx, cycle, "metadata"], "_", "pickle"
-    )
-    metadata: dict[str, Any] = read_pickle(metadata_path)
+    ### INFER COUNTY FIPS CODES ###
+
+    data: list = rdd.read_csv(data_path, [str] + [int] * 13)
+
+    counties: set[str] = set()
+    for row in data:
+        precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
+        county: str = rdd.GeoID(precinct).county[2:]
+        counties.add(county)
+
+    ### GATHER METADATA ###
+
+    C: int = rdd.COUNTIES_BY_STATE[xx]
+    D: int = rdd.DISTRICTS_BY_STATE[xx]["congress"]
+
+    county_to_index: dict[str, int] = {county: i for i, county in enumerate(counties)}
+
+    district_to_index: dict[int, int] = {
+        district: i for i, district in enumerate(range(1, D + 1))
+    }
+
+    metadata: dict[str, Any] = dict()
+    metadata["C"] = C
+    metadata["D"] = D
+    metadata["county_to_index"] = county_to_index
+    metadata["district_to_index"] = district_to_index
 
     return metadata
 
@@ -60,25 +69,9 @@ def load_metadata(xx: str) -> dict[str, Any]:
 def load_plan(plan_file: str) -> list[dict[str, str | int]]:
     """Read a precinct-assignment file."""
 
-    assignments: list[dict[str, str | int]] = read_csv(plan_file, [str, int])
+    assignments: list[dict[str, str | int]] = rdd.read_csv(plan_file, [str, int])
 
     return assignments
-
-
-# NOT USED
-
-
-def load_topology(xx: str) -> dict[str, Any]:
-    """Load the topology for a state."""
-
-    topo_file: str = f"{xx}_vtd_simple_topo.json"
-    # topo_file: str = f"{xx}_vtd_topo.json"
-    # topo_file: str = f"{xx}_vtd_quantized_topo.json"
-    topo_path: str = path_to_file([data_dir, xx]) + topo_file
-
-    topo: dict[str, Any] = read_json(topo_path)
-
-    return topo
 
 
 ### END ###
