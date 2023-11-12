@@ -4,13 +4,11 @@ Compute Dave's Redistricting (DRA) analytics for an ensemble of redistricting pl
 
 ## Installation
 
-```bash
-$ git clone https://github.com/alecramsay/rdafn
-$ cd rdafn
-$ pip install -r requirements.txt
-```
+I've converted this into a pip installable package:
 
-Also, make sure the `rdafn` directory is on your `PYTHONPATH`.
+```bash
+$ pip install rdafn
+```
 
 As noted next, you probably also want to clone the companion [rdadata](https://github.com/alecramsay/rdadata) repository
 
