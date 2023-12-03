@@ -18,7 +18,7 @@ $ python3 -m twine upload --repository pypi dist/rdafn-x.y.z*.*
 
 setup(
     name="rdafn",
-    version="1.1.1",
+    version="1.1.2",
     description="Redistricting analytics for scoring ensembles of redistricting plans",
     url="https://github.com/dra2020/rdafn",
     author="alecramsay",
