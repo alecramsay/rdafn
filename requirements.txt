@@ -1,7 +1,5 @@
 fiona==1.9.5
 pytest==7.4.2
-rdadata==1.1.0
+rdadata==1.1.1
 rdapy==1.4.0
-setuptools==63.2.0
-setuptools==67.8.0
-Shapely==2.0.2
+shapely==2.0.2
