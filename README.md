@@ -10,7 +10,7 @@ I've converted this into a pip installable package:
 $ pip install rdafn
 ```
 
-As noted next, you probably also want to clone the companion [rdadata](https://github.com/alecramsay/rdadata) repository
+As noted next, you probably also want to clone the companion [rdadata](https://github.com/alecramsay/rdadata) repository.
 
 ## Usage
 
