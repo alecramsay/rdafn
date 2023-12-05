@@ -17,37 +17,17 @@ import argparse
 from argparse import ArgumentParser, Namespace
 
 import os
-from typing import Any, Generator
+from typing import Any, List, Dict, Generator
 
 import rdadata as rdd
-from rdafn import *
-
-
-def parse_args() -> Namespace:
-    parser: ArgumentParser = argparse.ArgumentParser(
-        description="Analyze an ensemble of plans"
-    )
-
-    parser.add_argument(
-        "-s",
-        "--state",
-        default="NJ",
-        help="The two-character state code (e.g., NJ)",
-        type=str,
-    )
-    parser.add_argument(
-        "-e",
-        "--ensemble",
-        default="~/Downloads/",  # TODO: Change this a default ensemble
-        help="Path to ensemble file",
-        type=str,
-    )
-    parser.add_argument(
-        "-v", "--verbose", dest="verbose", action="store_true", help="Verbose mode"
-    )
-
-    args: Namespace = parser.parse_args()
-    return args
+from rdafn import (
+    load_data,
+    load_shapes,
+    load_graph,
+    load_metadata,
+    load_plan,
+    analyze_plan,
+)
 
 
 ### PLAN GENERATOR ###
@@ -58,7 +38,7 @@ def plans_from_ensemble(
 ) -> Generator[List[Dict[str, str | int]], None, None]:
     """Return plans (assignments) one at a time from an ensemble file"""
 
-    # TODO - Replace this with code that reads an ensemble file and returns plans one at a time
+    # Replace this with code that reads an ensemble file and returns plans one at a time
     ensemble: List[List[Dict[str, str | int]]] = [
         load_plan(os.path.expanduser("sample/") + f"{xx}20C_baseline_100.csv")
     ]
@@ -94,7 +74,7 @@ def main() -> None:
 
     ### BOILERPLATE - DON'T CHANGE THIS ###
 
-    data: Dict[str, Dict[str, int]] = load_data(data_path)
+    data: Dict[str, Dict[str, str | int]] = load_data(data_path)
     shapes: Dict[str, Any] = load_shapes(shapes_path)
     graph: Dict[str, List[str]] = load_graph(graph_path)
     metadata: Dict[str, Any] = load_metadata(xx, data_path)
@@ -111,12 +91,39 @@ def main() -> None:
                 metadata,
             )
 
-            # TODO - Do something with the resulting "scorecard"
+            # Do something with the resulting "scorecard"
 
             print(scorecard)
 
         except Exception as e:
             print(f"Error analyzing plan: {e}")
+
+
+def parse_args() -> Namespace:
+    parser: ArgumentParser = argparse.ArgumentParser(
+        description="Analyze an ensemble of plans"
+    )
+
+    parser.add_argument(
+        "-s",
+        "--state",
+        default="NJ",
+        help="The two-character state code (e.g., NJ)",
+        type=str,
+    )
+    parser.add_argument(
+        "-e",
+        "--ensemble",
+        default="~/Downloads/",
+        help="Path to ensemble file",
+        type=str,
+    )
+    parser.add_argument(
+        "-v", "--verbose", dest="verbose", action="store_true", help="Verbose mode"
+    )
+
+    args: Namespace = parser.parse_args()
+    return args
 
 
 if __name__ == "__main__":

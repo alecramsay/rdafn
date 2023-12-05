@@ -10,10 +10,17 @@ $ sample/sample_code.py
 """
 
 import os
-from typing import Any
+from typing import Any, List, Dict
 
 import rdadata as rdd
-from rdafn import *
+from rdafn import (
+    load_data,
+    load_shapes,
+    load_graph,
+    load_metadata,
+    load_plan,
+    analyze_plan,
+)
 
 # Specify a state and an ensemble of plans
 
@@ -47,7 +54,7 @@ ensemble: List[str] = [
 
 ### BOILERPLATE - DON'T CHANGE THIS ###
 
-data: Dict[str, Dict[str, int]] = load_data(data_path)
+data: Dict[str, Dict[str, str | int]] = load_data(data_path)
 shapes: Dict[str, Any] = load_shapes(shapes_path)
 graph: Dict[str, List[str]] = load_graph(graph_path)
 metadata: Dict[str, Any] = load_metadata(xx, data_path)
@@ -66,7 +73,7 @@ for plan_path in ensemble:
             metadata,
         )
 
-        # TODO - Do something with the resulting "scorecard"
+        # Do something with the resulting "scorecard"
 
         print()
         print(f"Scorecard:")

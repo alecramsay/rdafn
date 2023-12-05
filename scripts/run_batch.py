@@ -11,6 +11,9 @@ $ scripts/run_batch.py
 """
 
 import os
+from typing import List
+
+from rdadata import data_dir
 from rdafn import *
 
 states: List[str] = [

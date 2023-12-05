@@ -29,7 +29,7 @@ dem_votes_field: str = rdd.election_fields[2]
 # @rdd.time_function
 def analyze_plan(
     assignments: List[Dict[str, str | int]],
-    data: Dict[str, Dict[str, int]],
+    data: Dict[str, Dict[str, str | int]],
     shapes: Dict[str, Any],
     graph: Dict[str, List[str]],
     metadata: Dict[str, Any],
@@ -124,7 +124,7 @@ def analyze_plan(
 
 def aggregate_data_by_district(
     assignments: List[Dict[str, str | int]],
-    data: Dict[str, Dict[str, int]],
+    data: Dict[str, Dict[str, str | int]],
     n_districts: int,
     n_counties: int,
     county_to_index: Dict[str, int],
@@ -155,15 +155,15 @@ def aggregate_data_by_district(
 
         # For population deviation
 
-        pop: int = data[precinct][total_pop_field]
+        pop: int = int(data[precinct][total_pop_field])
         pop_by_district[district] += pop
         total_pop += pop
 
         # For partisan metrics
 
-        d: int = data[precinct][dem_votes_field]
-        tot: int = (
-            data[precinct][dem_votes_field] + data[precinct][rep_votes_field]
+        d: int = int(data[precinct][dem_votes_field])
+        tot: int = int(data[precinct][dem_votes_field]) + int(
+            data[precinct][rep_votes_field]
         )  # NOTE - Two-party vote total
 
         d_by_district[district] += d
@@ -175,8 +175,8 @@ def aggregate_data_by_district(
         # For minority opportunity metrics
 
         for demo in rdd.census_fields[1:]:  # Everything except total population
-            demos_totals[demo] += data[precinct][demo]
-            demos_by_district[district][demo] += data[precinct][demo]
+            demos_totals[demo] += int(data[precinct][demo])
+            demos_by_district[district][demo] += int(data[precinct][demo])
 
         # For county-district splitting
 

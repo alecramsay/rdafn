@@ -2,6 +2,8 @@
 TEST SAMPLE SCORECARDS
 """
 
+from typing import Any, Dict, List
+
 import rdadata as rdd
 import rdapy as rda
 
@@ -34,7 +36,7 @@ class TestScorecard:
 
             ### BOILERPLATE - DON'T CHANGE THIS ###
 
-            data: Dict[str, Dict[str, int]] = load_data(data_path)
+            data: Dict[str, Dict[str, str | int]] = load_data(data_path)
             shapes: Dict[str, Any] = load_shapes(shapes_path)
             graph: Dict[str, List[str]] = load_graph(graph_path)
             metadata: Dict[str, Any] = load_metadata(xx, data_path)
