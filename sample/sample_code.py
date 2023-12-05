@@ -37,7 +37,7 @@ graph_path: str = rdd.path_to_file([shared_data_dir, xx]) + rdd.file_name(
 
 ### AN ENSEMBLE OF PLAN CSV FILES ON DISK ###
 
-ensemble: list[str] = [
+ensemble: List[str] = [
     os.path.expanduser(f"{sample_dir}/") + x
     for x in [
         f"{xx}20C_baseline_100.csv",
@@ -47,18 +47,18 @@ ensemble: list[str] = [
 
 ### BOILERPLATE - DON'T CHANGE THIS ###
 
-data: dict[str, dict[str, int]] = load_data(data_path)
-shapes: dict[str, Any] = load_shapes(shapes_path)
-graph: dict[str, list[str]] = load_graph(graph_path)
-metadata: dict[str, Any] = load_metadata(xx, data_path)
+data: Dict[str, Dict[str, int]] = load_data(data_path)
+shapes: Dict[str, Any] = load_shapes(shapes_path)
+graph: Dict[str, List[str]] = load_graph(graph_path)
+metadata: Dict[str, Any] = load_metadata(xx, data_path)
 
 ### ANALYZE EACH PLAN IN THE ENSEMBLE ###
 
 for plan_path in ensemble:
     try:
-        assignments: list[dict[str, str | int]] = load_plan(plan_path)
+        assignments: List[Dict[str, str | int]] = load_plan(plan_path)
 
-        scorecard: dict[str, Any] = analyze_plan(
+        scorecard: Dict[str, Any] = analyze_plan(
             assignments,
             data,
             shapes,

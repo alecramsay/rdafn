@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """
 TEST SAMPLE SCORECARDS
 """
@@ -19,7 +17,7 @@ class TestScorecard:
     def test_scorecard(self) -> None:
         for xx in ["NC", "NJ"]:
             plan_path: str = f"sample/{xx}20C_baseline_100.csv"
-            plan: list[dict[str, str | int]] = load_plan(plan_path)
+            plan: List[Dict[str, str | int]] = load_plan(plan_path)
 
             data_project: str = "../rdadata"
             shared_data_dir: str = f"{data_project}/data/"
@@ -36,28 +34,28 @@ class TestScorecard:
 
             ### BOILERPLATE - DON'T CHANGE THIS ###
 
-            data: dict[str, dict[str, int]] = load_data(data_path)
-            shapes: dict[str, Any] = load_shapes(shapes_path)
-            graph: dict[str, list[str]] = load_graph(graph_path)
-            metadata: dict[str, Any] = load_metadata(xx, data_path)
+            data: Dict[str, Dict[str, int]] = load_data(data_path)
+            shapes: Dict[str, Any] = load_shapes(shapes_path)
+            graph: Dict[str, List[str]] = load_graph(graph_path)
+            metadata: Dict[str, Any] = load_metadata(xx, data_path)
 
-            scorecard: dict[str, Any] = analyze_plan(
+            scorecard: Dict[str, Any] = analyze_plan(
                 plan, data, shapes, graph, metadata
             )
 
             #
 
             expected_path: str = f"{rdd.testdata_dir}/{xx}_DRA_scorecard.json"
-            expected: dict[str, Any] = read_json(expected_path)
+            expected: Dict[str, Any] = read_json(expected_path)
 
             decimals_path: str = f"{rdd.testdata_dir}/expected_decimal_places.json"
-            approx_floats: dict[str, int] = read_json(decimals_path)
-            exact_ints: list[str] = [
+            approx_floats: Dict[str, int] = read_json(decimals_path)
+            exact_ints: List[str] = [
                 "pr_seats",
                 "proportional_opportunities",
                 "proportional_coalitions",
             ]
-            approx_ints: list[str] = [
+            approx_ints: List[str] = [
                 # "kiwysi", # Disabled due to large runtime cost
                 "proportionality",
                 "competitiveness",
@@ -80,18 +78,18 @@ class TestScorecard:
     def test_compactness(self) -> None:
         for xx in ["NC", "NJ"]:
             profile_path = f"testdata/{xx}_root_profile.json"
-            profile: dict[str, Any] = read_json(profile_path)
-            implicit_district_props: list[dict[str, float]] = profile["shapes"]
+            profile: Dict[str, Any] = read_json(profile_path)
+            implicit_district_props: List[Dict[str, float]] = profile["shapes"]
 
             scorecard_path: str = f"{rdd.testdata_dir}/{xx}_DRA_scorecard.json"
-            expected: dict[str, Any] = read_json(scorecard_path)
+            expected: Dict[str, Any] = read_json(scorecard_path)
 
             #
 
-            actual: dict[str, float] = calc_compactness_metrics(implicit_district_props)
+            actual: Dict[str, float] = calc_compactness_metrics(implicit_district_props)
 
             # decimals_path: str = f"{testdata_dir}/expected_decimal_places.json"
-            # approx_floats: dict[str, int] = read_json(decimals_path)
+            # approx_floats: Dict[str, int] = read_json(decimals_path)
 
             for metric in ["reock", "polsby_popper"]:
                 assert approx_equal(actual[metric], expected[metric], places=4)

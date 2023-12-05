@@ -55,11 +55,11 @@ def parse_args() -> Namespace:
 
 def plans_from_ensemble(
     xx: str, ensemble_path: str
-) -> Generator[list[dict[str, str | int]], None, None]:
+) -> Generator[List[Dict[str, str | int]], None, None]:
     """Return plans (assignments) one at a time from an ensemble file"""
 
     # TODO - Replace this with code that reads an ensemble file and returns plans one at a time
-    ensemble: list[list[dict[str, str | int]]] = [
+    ensemble: List[List[Dict[str, str | int]]] = [
         load_plan(os.path.expanduser("sample/") + f"{xx}20C_baseline_100.csv")
     ]
 
@@ -94,16 +94,16 @@ def main() -> None:
 
     ### BOILERPLATE - DON'T CHANGE THIS ###
 
-    data: dict[str, dict[str, int]] = load_data(data_path)
-    shapes: dict[str, Any] = load_shapes(shapes_path)
-    graph: dict[str, list[str]] = load_graph(graph_path)
-    metadata: dict[str, Any] = load_metadata(xx, data_path)
+    data: Dict[str, Dict[str, int]] = load_data(data_path)
+    shapes: Dict[str, Any] = load_shapes(shapes_path)
+    graph: Dict[str, List[str]] = load_graph(graph_path)
+    metadata: Dict[str, Any] = load_metadata(xx, data_path)
 
     ### ANALYZE EACH PLAN IN THE ENSEMBLE ###
 
     for assignments in plans_from_ensemble(xx, ensemble_path):
         try:
-            scorecard: dict[str, Any] = analyze_plan(
+            scorecard: Dict[str, Any] = analyze_plan(
                 assignments,
                 data,
                 shapes,

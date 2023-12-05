@@ -13,7 +13,7 @@ $ scripts/run_batch.py
 import os
 from rdafn import *
 
-states: list[str] = [
+states: List[str] = [
     "SC",
     "NM",
     "AL",

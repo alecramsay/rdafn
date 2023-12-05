@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
 """
 ANALYZE A PLAN
 """
 
 from collections import defaultdict
-from typing import Any
+from typing import Any, List, Dict, Tuple, Set
 
 import rdapy as rda
 import rdadata as rdd
@@ -30,25 +28,25 @@ dem_votes_field: str = rdd.election_fields[2]
 
 # @rdd.time_function
 def analyze_plan(
-    assignments: list[dict[str, str | int]],
-    data: dict[str, dict[str, int]],
-    shapes: dict[str, Any],
-    graph: dict[str, list[str]],
-    metadata: dict[str, Any],
-) -> dict[str, Any]:
+    assignments: List[Dict[str, str | int]],
+    data: Dict[str, Dict[str, int]],
+    shapes: Dict[str, Any],
+    graph: Dict[str, List[str]],
+    metadata: Dict[str, Any],
+) -> Dict[str, Any]:
     """Analyze a plan."""
 
     n_districts: int = metadata["D"]
     n_counties: int = metadata["C"]
-    county_to_index: dict[str, int] = metadata["county_to_index"]
-    district_to_index: dict[int, int] = metadata["district_to_index"]
+    county_to_index: Dict[str, int] = metadata["county_to_index"]
+    district_to_index: Dict[int, int] = metadata["district_to_index"]
 
     ### AGGREGATE DATA & SHAPES BY DISTRICT ###
 
-    aggregates: dict[str, Any] = aggregate_data_by_district(
+    aggregates: Dict[str, Any] = aggregate_data_by_district(
         assignments, data, n_districts, n_counties, county_to_index, district_to_index
     )
-    district_props: list[dict[str, Any]] = aggregate_shapes_by_district(
+    district_props: List[Dict[str, Any]] = aggregate_shapes_by_district(
         assignments, shapes, graph, n_districts
     )
 
@@ -57,19 +55,19 @@ def analyze_plan(
     deviation: float = calc_population_deviation(
         aggregates["pop_by_district"], aggregates["total_pop"], n_districts
     )
-    partisan_metrics: dict[str, float] = calc_partisan_metrics(
+    partisan_metrics: Dict[str, float] = calc_partisan_metrics(
         aggregates["total_d_votes"],
         aggregates["total_votes"],
         aggregates["d_by_district"],
         aggregates["tot_by_district"],
     )
-    minority_metrics: dict[str, float] = calc_minority_metrics(
+    minority_metrics: Dict[str, float] = calc_minority_metrics(
         aggregates["demos_totals"], aggregates["demos_by_district"], n_districts
     )
-    compactness_metrics: dict[str, float] = calc_compactness_metrics(district_props)
-    splitting_metrics: dict[str, float] = calc_splitting_metrics(aggregates["CxD"])
+    compactness_metrics: Dict[str, float] = calc_compactness_metrics(district_props)
+    splitting_metrics: Dict[str, float] = calc_splitting_metrics(aggregates["CxD"])
 
-    scorecard: dict[str, Any] = dict()
+    scorecard: Dict[str, Any] = dict()
     scorecard["population_deviation"] = deviation
     scorecard.update(partisan_metrics)
     scorecard.update(minority_metrics)
@@ -78,7 +76,7 @@ def analyze_plan(
 
     ### RATE THE DIMENSIONS ###
 
-    ratings: dict[str, int] = rate_dimensions(
+    ratings: Dict[str, int] = rate_dimensions(
         proportionality=(
             scorecard["pr_deviation"],
             scorecard["estimated_vote_pct"],
@@ -104,7 +102,7 @@ def analyze_plan(
     ### TRIM THE FLOATING POINT RESULTS ###
 
     precision: int = 4
-    int_metrics: list[str] = [
+    int_metrics: List[str] = [
         "pr_seats",
         "proportional_opportunities",
         "proportional_coalitions",
@@ -125,13 +123,13 @@ def analyze_plan(
 
 
 def aggregate_data_by_district(
-    assignments: list[dict[str, str | int]],
-    data: dict[str, dict[str, int]],
+    assignments: List[Dict[str, str | int]],
+    data: Dict[str, Dict[str, int]],
     n_districts: int,
     n_counties: int,
-    county_to_index: dict[str, int],
-    district_to_index: dict[int, int],
-) -> dict[str, Any]:
+    county_to_index: Dict[str, int],
+    district_to_index: Dict[int, int],
+) -> Dict[str, Any]:
     """Aggregate census & election data by district."""
 
     total_pop: int = 0
@@ -139,17 +137,17 @@ def aggregate_data_by_district(
 
     total_votes: int = 0
     total_d_votes: int = 0
-    d_by_district: dict[int, int] = defaultdict(int)
-    tot_by_district: dict[int, int] = defaultdict(int)
+    d_by_district: Dict[int, int] = defaultdict(int)
+    tot_by_district: Dict[int, int] = defaultdict(int)
     # d_by_district: defaultdict[int, int] = defaultdict(int)
     # tot_by_district: defaultdict[int, int] = defaultdict(int)
 
-    demos_totals: dict[str, int] = defaultdict(int)
-    demos_by_district: list[dict[str, int]] = [
+    demos_totals: Dict[str, int] = defaultdict(int)
+    demos_by_district: List[Dict[str, int]] = [
         defaultdict(int) for _ in range(n_districts + 1)
     ]
 
-    CxD: list[list[float]] = [[0.0] * n_counties for _ in range(n_districts)]
+    CxD: List[List[float]] = [[0.0] * n_counties for _ in range(n_districts)]
 
     for row in assignments:
         precinct: str = str(row["GEOID"] if "GEOID" in row else row["GEOID20"])
@@ -189,7 +187,7 @@ def aggregate_data_by_district(
 
         CxD[i][j] += pop
 
-    aggregates: dict[str, Any] = {
+    aggregates: Dict[str, Any] = {
         "total_pop": total_pop,
         "pop_by_district": pop_by_district,
         "total_votes": total_votes,
@@ -207,9 +205,9 @@ def aggregate_data_by_district(
 def border_length(
     geoid: str,
     district: int,
-    district_by_geoid: dict[str, int],
-    shapes: dict[str, Any],
-    graph: dict[str, list[str]],
+    district_by_geoid: Dict[str, int],
+    shapes: Dict[str, Any],
+    graph: Dict[str, List[str]],
 ) -> float:
     """Sum the length of the border with other districts or the state border."""
 
@@ -226,17 +224,17 @@ def border_length(
 
 
 def aggregate_shapes_by_district(
-    assignments: list[dict[str, str | int]],
-    shapes: dict[str, Any],
-    graph: dict[str, list[str]],
+    assignments: List[Dict[str, str | int]],
+    shapes: Dict[str, Any],
+    graph: Dict[str, List[str]],
     n_districts: int,
-) -> list[dict[str, float]]:
+) -> List[Dict[str, float]]:
     """Aggregate shape data by district for compactness calculations."""
 
     # Normalize the assignments & index districts by precinct
 
-    plan: list[dict] = list()
-    district_by_geoid: dict[str, int] = dict()
+    plan: List[Dict] = list()
+    district_by_geoid: Dict[str, int] = dict()
     geoid_field: str = "GEOID" if "GEOID" in assignments[0] else "GEOID20"
     district_field: str = "DISTRICT" if "DISTRICT" in assignments[0] else "District"
 
@@ -249,7 +247,7 @@ def aggregate_shapes_by_district(
 
     # Set up aggregates
 
-    by_district: list[dict[str, Any]] = [
+    by_district: List[Dict[str, Any]] = [
         {"area": 0.0, "perimeter": 0.0, "exterior": list()}
         for _ in range(n_districts + 1)
     ]
@@ -268,7 +266,7 @@ def aggregate_shapes_by_district(
 
     # Calculate district diameters
 
-    implied_district_props: list[dict[str, float]] = []
+    implied_district_props: List[Dict[str, float]] = []
     for d in by_district[1:]:  # Remove the dummy district
         _, _, r = rda.make_circle(d["exterior"])
 
@@ -300,15 +298,15 @@ def calc_population_deviation(
 def calc_partisan_metrics(
     total_d_votes: int,
     total_votes: int,
-    d_by_district: dict[int, int],
-    tot_by_district: dict[int, int],
-) -> dict[str, float]:
+    d_by_district: Dict[int, int],
+    tot_by_district: Dict[int, int],
+) -> Dict[str, float]:
     """Calulate partisan metrics."""
 
-    partisan_metrics: dict[str, float] = dict()
+    partisan_metrics: Dict[str, float] = dict()
 
     Vf: float = total_d_votes / total_votes
-    Vf_array: list[float] = [
+    Vf_array: List[float] = [
         d / tot for d, tot in zip(d_by_district.values(), tot_by_district.values())
     ]
     partisan_metrics["estimated_vote_pct"] = Vf
@@ -361,22 +359,22 @@ def calc_partisan_metrics(
 
 
 def calc_minority_metrics(
-    demos_totals: dict[str, int],
-    demos_by_district: list[dict[str, int]],
+    demos_totals: Dict[str, int],
+    demos_by_district: List[Dict[str, int]],
     n_districts: int,
-) -> dict[str, float]:
+) -> Dict[str, float]:
     """Calculate minority metrics."""
 
-    statewide_demos: dict[str, float] = dict()
+    statewide_demos: Dict[str, float] = dict()
     for demo in rdd.census_fields[2:]:  # Skip total population & total VAP
         simple_demo: str = demo.split("_")[0].lower()
         statewide_demos[simple_demo] = (
             demos_totals[demo] / demos_totals[total_vap_field]
         )
 
-    by_district: list[dict[str, float]] = list()
+    by_district: List[Dict[str, float]] = list()
     for i in range(1, n_districts + 1):
-        district_demos: dict[str, float] = dict()
+        district_demos: Dict[str, float] = dict()
         for demo in rdd.census_fields[2:]:  # Skip total population & total VAP
             simple_demo: str = demo.split("_")[0].lower()
             district_demos[simple_demo] = (
@@ -385,7 +383,7 @@ def calc_minority_metrics(
 
         by_district.append(district_demos)
 
-    minority_metrics: dict[str, float] = rda.calc_minority_opportunity(
+    minority_metrics: Dict[str, float] = rda.calc_minority_opportunity(
         statewide_demos, by_district
     )
 
@@ -393,8 +391,8 @@ def calc_minority_metrics(
 
 
 def calc_compactness_metrics(
-    district_props: list[dict[str, float]]
-) -> dict[str, float]:
+    district_props: List[Dict[str, float]]
+) -> Dict[str, float]:
     """Calculate compactness metrics using implied district props."""
 
     tot_reock: float = 0
@@ -410,19 +408,19 @@ def calc_compactness_metrics(
     avg_reock: float = tot_reock / len(district_props)
     avg_polsby: float = tot_polsby / len(district_props)
 
-    compactness_metrics: dict[str, float] = dict()
+    compactness_metrics: Dict[str, float] = dict()
     compactness_metrics["reock"] = avg_reock
     compactness_metrics["polsby_popper"] = avg_polsby
 
     return compactness_metrics
 
 
-def calc_splitting_metrics(CxD: list[list[float]]) -> dict[str, float]:
+def calc_splitting_metrics(CxD: List[List[float]]) -> Dict[str, float]:
     """Calculate county-district splitting metrics."""
 
-    all_results: dict[str, float] = rda.calc_county_district_splitting(CxD)
+    all_results: Dict[str, float] = rda.calc_county_district_splitting(CxD)
 
-    splitting_metrics: dict[str, float] = dict()
+    splitting_metrics: Dict[str, float] = dict()
     splitting_metrics["county_splitting"] = all_results["county"]
     splitting_metrics["district_splitting"] = all_results["district"]
 
@@ -439,10 +437,10 @@ def rate_dimensions(
     minority: tuple,
     compactness: tuple,
     splitting: tuple,
-) -> dict[str, int]:
+) -> Dict[str, int]:
     """Rate the dimensions of a plan."""
 
-    ratings: dict[str, int] = dict()
+    ratings: Dict[str, int] = dict()
 
     disproportionality, Vf, Sf = proportionality
     ratings["proportionality"] = rda.rate_proportionality(disproportionality, Vf, Sf)
