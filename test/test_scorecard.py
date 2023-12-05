@@ -48,10 +48,10 @@ class TestScorecard:
             #
 
             expected_path: str = f"{rdd.testdata_dir}/{xx}_DRA_scorecard.json"
-            expected: Dict[str, Any] = read_json(expected_path)
+            expected: Dict[str, Any] = rdd.read_json(expected_path)
 
             decimals_path: str = f"{rdd.testdata_dir}/expected_decimal_places.json"
-            approx_floats: Dict[str, int] = read_json(decimals_path)
+            approx_floats: Dict[str, int] = rdd.read_json(decimals_path)
             exact_ints: List[str] = [
                 "pr_seats",
                 "proportional_opportunities",
@@ -80,11 +80,11 @@ class TestScorecard:
     def test_compactness(self) -> None:
         for xx in ["NC", "NJ"]:
             profile_path = f"testdata/{xx}_root_profile.json"
-            profile: Dict[str, Any] = read_json(profile_path)
+            profile: Dict[str, Any] = rdd.read_json(profile_path)
             implicit_district_props: List[Dict[str, float]] = profile["shapes"]
 
             scorecard_path: str = f"{rdd.testdata_dir}/{xx}_DRA_scorecard.json"
-            expected: Dict[str, Any] = read_json(scorecard_path)
+            expected: Dict[str, Any] = rdd.read_json(scorecard_path)
 
             #
 
