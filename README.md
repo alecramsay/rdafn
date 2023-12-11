@@ -1,6 +1,8 @@
 # rdafn
-
 Compute Dave's Redistricting (DRA) analytics for an ensemble of redistricting plans.
+
+Note: This repository has been archived.
+The data and code have been moved to the [rdatools/rdascore](https://github.com/rdatools/rdascore).
 
 ## Installation
 
